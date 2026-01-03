@@ -9,9 +9,10 @@ class RegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = [
-            'email', 'first_name', 'last_name', 'username', 'phone_number', 'role', 'password', 'password2'
+            'id', 'email', 'first_name', 'last_name', 'username', 'phone_number', 'role', 'is_staff', 'password', 'password2'
         ]
 
+    # check validate if pw dose not much
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError("Passwords must match")
