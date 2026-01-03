@@ -57,13 +57,6 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-## Environment Variables
-Create a `.env` file:
-```bash
-DEBUG=True
-SECRET_KEY=your-secret-key
-DATABASE_URL=postgres://user:password@localhost:5432/dbname
-```
 ## 🧭 Roadmap
 
 - [x] Core inventory & order system
