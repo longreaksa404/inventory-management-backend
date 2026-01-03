@@ -5,6 +5,7 @@ __pycache__/
 # Environment
 .env
 venv/
+.env.*
 
 # Django
 db.sqlite3
@@ -12,3 +13,7 @@ db.sqlite3
 # Editor
 .idea/
 .vscode/
+
+# Logs
+logs/
+*.log
