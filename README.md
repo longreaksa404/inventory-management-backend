@@ -29,6 +29,16 @@ Key goals:
 - **Supplier & Order Management**: CRUD suppliers, purchase & sales orders  
 - **Reporting**: Inventory valuation, low-stock alerts, audit trails  
 
+---
+
+## 🔌 API Documentation (Swagger)
+
+Swagger UI showing authentication and core business workflows.
+
+![Swagger Overview](screenshots/swagger-overview.jpg)
+![Auth Endpoints](screenshots/auth-endpoints.jpg)
+![Order Workflow](screenshots/order-workflow.jpg)
+
 > Full API documentation is available via Swagger.
 
 ---
