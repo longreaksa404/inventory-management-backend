@@ -54,17 +54,21 @@ Swagger UI showing authentication and core business workflows.
 ---
 
 ## ⚙️ Setup & Installation
+
 ```bash
-git clone https://github.com/your-username/inventory-management-backend.git
+git clone https://github.com/longchanreaksa/inventory-management-backend.git
 cd inventory-management-backend
 
-pipenv install
-pipenv shell
+python -m venv venv
+source venv/bin/activate   # Linux / macOS
+# venv\Scripts\activate    # Windows
 
-# Run migrations and create admin user
+pip install -r requirements.txt
+
 python manage.py migrate
 python manage.py createsuperuser
 python manage.py runserver
+
 ```
 
 ## 🧭 Roadmap
