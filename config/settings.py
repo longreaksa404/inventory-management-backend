@@ -192,7 +192,7 @@ LOGGING = {
             'handlers': ['console', 'file'],
             'level': 'INFO',
         },
-        'inventory_system': {
+        'inventory-management-backend': {
             'handlers': ['console', 'file'],
             'level': 'DEBUG',
             'propagate': False,
