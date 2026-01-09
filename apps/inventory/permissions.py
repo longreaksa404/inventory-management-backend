@@ -1,117 +1,102 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 
-def has_perm(user, perm_codename):
+def has_perm(user, perm):
     """
-    Helper to check if user has a specific permission.
-    Superusers always have permission.
+    Safe permission checker.
+    Works with Django groups + user permissions.
     """
     if not user or not user.is_authenticated:
         return False
-    if user.is_superuser:
-        return True
-    return user.has_perm(perm_codename)
+    return user.has_perm(perm)
 
-
-class IsStaffOrReadOnly(BasePermission):
+class CategoryPermission(BasePermission):
     """
-    Only staff users can edit objects, everyone else can read.
-    """
-    def has_permission(self, request, view):
-        if request.method in SAFE_METHODS:
-            return True
-        return request.user.is_staff
-
-
-class ProductPermission(BasePermission):
-    """
-    Permissions for Product model.
+    Permissions for Category CRUD
     """
 
     def has_permission(self, request, view):
-        # Read-only access
         if request.method in SAFE_METHODS:
-            return has_perm(request.user, "inventory.view_product")
+            return has_perm(request.user, "inventory.view_category")
 
-        # Create product
-        if view.action == "create":
-            return has_perm(request.user, "inventory.add_product")
+        if request.method == "POST":
+            return has_perm(request.user, "inventory.add_category")
 
-        return True
+        if request.method in ["PUT", "PATCH"]:
+            return has_perm(request.user, "inventory.change_category")
 
-    def has_object_permission(self, request, view, obj):
-        # View
-        if request.method in SAFE_METHODS:
-            return has_perm(request.user, "inventory.view_product")
-
-        # Update / delete
-        if view.action in ["update", "partial_update", "destroy"]:
-            return has_perm(request.user, "inventory.change_product")
-
-        # Custom actions
-        if view.action == "adjust_stock":
-            return has_perm(request.user, "inventory.adjust_stock")
-
-        if view.action == "discontinue":
-            return has_perm(request.user, "inventory.discontinue_product")
-
-        if view.action == "view_cost":
-            return has_perm(request.user, "inventory.view_cost_price")
+        if request.method == "DELETE":
+            return has_perm(request.user, "inventory.delete_category")
 
         return False
 
-
-class StockTransactionPermission(BasePermission):
+class ProductPermission(BasePermission):
     """
-    Permissions for StockTransaction model.
+    Permissions for Product operations
     """
 
     def has_permission(self, request, view):
-        # Read-only
         if request.method in SAFE_METHODS:
-            return has_perm(request.user, "inventory.view_stocktransaction")
+            return has_perm(request.user, "inventory.view_product")
 
-        # Create transaction
-        if view.action == "create":
+        if request.method == "POST":
+            return has_perm(request.user, "inventory.add_product")
+
+        if request.method in ["PUT", "PATCH"]:
+            return has_perm(request.user, "inventory.change_product")
+
+        if request.method == "DELETE":
+            return has_perm(request.user, "inventory.delete_product")
+
+        return False
+
+class StockTransactionPermission(BasePermission):
+    """
+    Permissions for StockTransaction operations
+    """
+
+    def has_permission(self, request, view):
+        # Read history
+        if request.method in SAFE_METHODS:
+            return (
+                has_perm(request.user, "inventory.view_stocktransaction")
+                or has_perm(request.user, "inventory.view_stock_history")
+            )
+
+        # Create IN / OUT / ADJ
+        if request.method == "POST":
             return has_perm(request.user, "inventory.create_stock_transaction")
 
-        return True
-
-    def has_object_permission(self, request, view, obj):
-        # View
-        if request.method in SAFE_METHODS:
-            return has_perm(request.user, "inventory.view_stocktransaction")
-
-        # Update / delete (rare, maybe for adjustments)
-        if view.action in ["update", "partial_update", "destroy"]:
+        # Update or delete (normally restricted)
+        if request.method in ["PUT", "PATCH", "DELETE"]:
             return has_perm(request.user, "inventory.approve_stock_transaction")
 
         return False
 
-
 class LowStockAlertPermission(BasePermission):
     """
-    Permissions for LowStockAlert model.
+    Permissions for LowStockAlert handling
     """
 
     def has_permission(self, request, view):
-        # Read-only
         if request.method in SAFE_METHODS:
             return has_perm(request.user, "inventory.view_low_stock_alert")
 
-        # Custom actions like resolving alerts
-        if view.action == "resolve":
+        if request.method in ["PUT", "PATCH"]:
             return has_perm(request.user, "inventory.resolve_low_stock_alert")
 
         return False
 
-    def has_object_permission(self, request, view, obj):
-        # View
-        if request.method in SAFE_METHODS:
-            return has_perm(request.user, "inventory.view_low_stock_alert")
+class ProductActionPermission(BasePermission):
+    """
+    Permissions for custom product actions
+    """
 
-        # Resolve / delete alert
-        if view.action in ["resolve", "destroy"]:
-            return has_perm(request.user, "inventory.resolve_low_stock_alert")
+    def has_permission(self, request, view):
+        if view.action == "discontinue":
+            return has_perm(request.user, "inventory.discontinue_product")
 
-        return False
+        if view.action == "adjust_stock":
+            return has_perm(request.user, "inventory.adjust_stock")
+
+        return True

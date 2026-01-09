@@ -15,6 +15,11 @@ django-environ = "*"
 requests = "*"
 twilio = "*"
 flower = "*"
+pytest = "*"
+pytest-django = "*"
+pytest-mock = "*"
+pytest-cov = "*"
+factory-boy = "*"
 
 [dev-packages]
 

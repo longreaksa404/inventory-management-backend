@@ -1,21 +1,42 @@
-from django.urls import path
-from .views import CategoryListCreateView, CategoryDetailView, ProductListCreateView, ProductDetailView, \
-    StockTransactionListCreateView, StockSummaryView, StockHistoryView, LowStockAlertViewSet
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 
-# Map ViewSet actions manually
-low_stock_alert_list = LowStockAlertViewSet.as_view({'get': 'list'})
-low_stock_alert_detail = LowStockAlertViewSet.as_view({'get': 'retrieve'})
+from .views import (
+    CategoryListCreateView,
+    CategoryDetailView,
+    ProductViewSet,
+    ProductListCreateView,
+    ProductDetailView,
+    StockTransactionListCreateView,
+    StockSummaryView,
+    StockHistoryView,
+    LowStockAlertViewSet,
+)
+
+
+router = DefaultRouter()
+router.register(r"products-actions", ProductViewSet, basename="product-actions")
+router.register(r"low-stock-alerts", LowStockAlertViewSet, basename="low-stock-alerts")
+
+
 urlpatterns = [
-    path('categories/', CategoryListCreateView.as_view(), name='category-list-create'),
-    path('categories/<int:pk>/', CategoryDetailView.as_view(), name='category-detail'),
-    path('products/', ProductListCreateView.as_view(), name='product-list-create'),
-    path('products/<int:pk>/', ProductDetailView.as_view(), name='product-detail'),
-    path('transactions/', StockTransactionListCreateView.as_view(), name='transaction-list-create'),
-    path('stock-summary/', StockSummaryView.as_view(), name='stocks-summary'),
-    path('stock-history/<int:product_id>/', StockHistoryView.as_view(), name='stock-history'),
-    path('low-stock-alerts/', low_stock_alert_list, name='low-stock-alert-list'),
-    path('low-stock-alerts/<int:pk>/', low_stock_alert_detail, name='low-stock-alert-detail'),
+    # -------- Categories --------
+    path("categories/", CategoryListCreateView.as_view(), name="category-list-create"),
+    path("categories/<int:pk>/", CategoryDetailView.as_view(), name="category-detail"),
+
+    # -------- Products (CRUD) --------
+    path("products/", ProductListCreateView.as_view(), name="product-list-create"),
+    path("products/<int:pk>/", ProductDetailView.as_view(), name="product-detail"),
+
+    # -------- Stock --------
+    path("transactions/", StockTransactionListCreateView.as_view(), name="transaction-list-create"),
+    path("stock-summary/", StockSummaryView.as_view(), name="stock-summary"),
+    path("stock-history/<int:product_id>/", StockHistoryView.as_view(), name="stock-history"),
+
+    # -------- ViewSets --------
+    path("", include(router.urls)),
 ]
+
 
 # use router way
 # from django.urls import path, include
