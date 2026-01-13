@@ -154,3 +154,38 @@ def login_api_client(admin_user, client):
     api_client = APIClient()
     api_client.force_authenticate(user=admin_user)
     return api_client
+
+import pytest
+from rest_framework.test import APIClient
+from django.contrib.auth import get_user_model
+from apps.inventory.models import Product
+
+User = get_user_model()
+
+@pytest.fixture
+def api_client():
+    return APIClient()
+
+@pytest.fixture
+def admin_user(db):
+    return User.objects.create_superuser(
+        username="admin",
+        password="password123",
+        role="Admin"
+    )
+
+@pytest.fixture
+def normal_user(db):
+    return User.objects.create_user(
+        username="user",
+        password="password123",
+        role="User"
+    )
+
+@pytest.fixture
+def product(db):
+    return Product.objects.create(
+        name="Test Product",
+        sku="TP001",
+        stock=0
+    )
