@@ -136,10 +136,10 @@ class StockHistoryView(SearchFilterOrderingMixin, generics.ListAPIView):
 
 
 class LowStockAlertViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = LowStockAlert.objects.all().order_by("-created_at")
+    queryset = LowStockAlert.objects.all().order_by("-triggered_at")
     serializer_class = LowStockAlertSerializer
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ['product', 'created_at']
+    filterset_fields = ['product', 'triggered_at']
 
 
 

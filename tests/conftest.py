@@ -1,11 +1,15 @@
-# tests/conftest.py
 import pytest
 from django.contrib.auth.hashers import make_password
+from rest_framework.test import APIClient
+from django.contrib.auth import get_user_model
+
 from apps.accounts.models import CustomUser
 from apps.inventory.models import Category, Product, StockTransaction
 from apps.warehouses.models import Warehouse
 from apps.suppliers.models import Supplier
-from apps.orders.models import PurchaseOrder, PurchaseOrderItem, SalesOrder, SalesOrderItem
+from apps.orders.models import PurchaseOrder, PurchaseOrderItem, SaleOrder, SaleOrderItem
+
+User = get_user_model()
 
 # -----------------------------
 # Users Fixtures
@@ -44,6 +48,21 @@ def staff_user(db):
         is_staff=False
     )
 
+@pytest.fixture
+def normal_user(db):
+    return CustomUser.objects.create_user(
+        username="user",
+        email="user@example.com",
+        first_name="Test",
+        last_name="User",
+        phone_number="012345678",   # ✅ add phone number
+        password="password123",
+        role="User"
+    )
+
+
+
+
 # -----------------------------
 # Inventory Fixtures
 # -----------------------------
@@ -62,8 +81,9 @@ def product(db, category):
         price=1000,
         quantity=10,
         status="ACTIVE",
-        category=category
+        category=category   # ✅ ensures category_id is set
     )
+
 
 @pytest.fixture
 def stock_transaction_in(db, product, admin_user, warehouse):
@@ -84,9 +104,10 @@ def stock_transaction_in(db, product, admin_user, warehouse):
 def warehouse(db):
     return Warehouse.objects.create(
         name="Main Warehouse",
-        location="Phnom Penh",
-        capacity=1000
+        location="Phnom Penh"
     )
+
+
 
 # -----------------------------
 # Suppliers Fixtures
@@ -127,7 +148,7 @@ def purchase_order_item(db, purchase_order, product):
 # -----------------------------
 @pytest.fixture
 def sales_order(db, staff_user):
-    return SalesOrder.objects.create(
+    return SaleOrder.objects.create(
         customer_name="John Doe",
         order_date="2026-01-01",
         status="PENDING",
@@ -137,7 +158,7 @@ def sales_order(db, staff_user):
 
 @pytest.fixture
 def sales_order_item(db, sales_order, product):
-    return SalesOrderItem.objects.create(
+    return SaleOrderItem.objects.create(
         order=sales_order,
         product=product,
         quantity=2,
@@ -148,44 +169,12 @@ def sales_order_item(db, sales_order, product):
 # Helper Fixtures / Common
 # -----------------------------
 @pytest.fixture
-def login_api_client(admin_user, client):
-    """APIClient logged in as admin for integration tests"""
-    from rest_framework.test import APIClient
-    api_client = APIClient()
-    api_client.force_authenticate(user=admin_user)
-    return api_client
-
-import pytest
-from rest_framework.test import APIClient
-from django.contrib.auth import get_user_model
-from apps.inventory.models import Product
-
-User = get_user_model()
-
-@pytest.fixture
 def api_client():
     return APIClient()
 
 @pytest.fixture
-def admin_user(db):
-    return User.objects.create_superuser(
-        username="admin",
-        password="password123",
-        role="Admin"
-    )
-
-@pytest.fixture
-def normal_user(db):
-    return User.objects.create_user(
-        username="user",
-        password="password123",
-        role="User"
-    )
-
-@pytest.fixture
-def product(db):
-    return Product.objects.create(
-        name="Test Product",
-        sku="TP001",
-        stock=0
-    )
+def login_api_client(admin_user):
+    """APIClient logged in as admin for integration tests"""
+    api_client = APIClient()
+    api_client.force_authenticate(user=admin_user)
+    return api_client

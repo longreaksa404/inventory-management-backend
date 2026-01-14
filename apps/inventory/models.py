@@ -14,7 +14,6 @@ class Category(models.Model):
 
     class Meta:
         ordering = ('name',)
-        # custom plural label
         verbose_name_plural = 'Categories'
 
     def __str__(self):
@@ -40,7 +39,6 @@ class Product(models.Model):
 
     class Meta:
         ordering = ('name',)
-        # speed booster for queries from database when filter or ordering
         indexes = [
             models.Index(fields=['sku']),
             models.Index(fields=['name']),
@@ -70,7 +68,6 @@ class StockTransaction(models.Model):
     warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name='stock_transactions', default=1)
     transaction_type = models.CharField(max_length=5, choices=TRANSACTION_STATUS_CHOICES, default='IN')
     quantity = models.PositiveIntegerField(validators=[MinValueValidator(1)])
-    # which user perform this transaction
     performed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -93,12 +90,14 @@ class StockTransaction(models.Model):
         return f"{self.get_transaction_type_display()} - {self.product.name} ({self.quantity})"
 
     def clean(self):
-        """Prevent stock from going negative."""
         if self.transaction_type == 'OUT' and self.product.quantity < self.quantity:
             raise ValidationError("Not enough stock to complete transaction")
 
+        if self.transaction_type == "ADJ" and getattr(self.performed_by, "role", None) != "Admin":
+            raise PermissionError("Only admins can adjust stock")
+        super().clean()
+
     def apply_transaction(self):
-        """Update product quantity based on transaction type."""
         if self.transaction_type == 'IN':
             self.product.quantity += self.quantity
         elif self.transaction_type == 'OUT':
@@ -110,17 +109,18 @@ class StockTransaction(models.Model):
         self.product.save()
 
     def save(self, *args, **kwargs):
-        """Automatically apply stock changes when saving a transaction."""
         self.full_clean()
         with transaction.atomic():
             super().save(*args, **kwargs)
             self.apply_transaction()
 
-# apps/inventory/models.py
+
 class LowStockAlert(models.Model):
-    product = models.ForeignKey("inventory.Product", on_delete=models.CASCADE)
-    message = models.CharField(max_length=255)
-    created_at = models.DateTimeField(auto_now_add=True)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE,default=1)
+    quantity = models.PositiveIntegerField(default=0)
+    reorder_level = models.PositiveIntegerField(default=1)
+    triggered_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         permissions = [
@@ -129,5 +129,14 @@ class LowStockAlert(models.Model):
         ]
 
     def __str__(self):
-        return f"Alert: {self.product.name} - {self.message}"
+        return f"{self.product.name} low stock ({self.quantity}/{self.reorder_level})"
 
+
+class StockReportEntry(models.Model):
+    alert = models.OneToOneField(LowStockAlert, on_delete=models.CASCADE, related_name="report_entry")
+    product_name = models.CharField(max_length=255)
+    quantity = models.PositiveIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Report for {self.product_name} (qty {self.quantity})"

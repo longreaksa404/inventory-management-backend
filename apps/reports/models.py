@@ -10,7 +10,7 @@ class InventorySnapshot(models.Model):
     Stores periodic snapshots of inventory valuation.
     Useful for historical reporting.
     """
-    warehouse = models.ForeignKey( "warehouses.Warehouse", on_delete=models.CASCADE, null=True, blank=True )
+    warehouse = models.ForeignKey("warehouses.Warehouse", on_delete=models.CASCADE, null=True, blank=True)
     total_value = models.DecimalField(max_digits=15, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -24,8 +24,8 @@ class InventorySnapshot(models.Model):
 class LowStockAlert(models.Model):
     product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name="low_stock_alerts")
     warehouse = models.ForeignKey("warehouses.Warehouse", on_delete=models.PROTECT, related_name="low_stock_alerts")
-    quantity = models.PositiveIntegerField()  # ✅ add this
-    reorder_level = models.PositiveIntegerField()
+    quantity = models.PositiveIntegerField(default=0)        # ✅ safe default
+    reorder_level = models.PositiveIntegerField(default=1)   # ✅ safe default
     triggered_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -34,7 +34,6 @@ class LowStockAlert(models.Model):
 
     def __str__(self):
         return f"{self.product.name} low stock ({self.quantity}/{self.reorder_level})"
-
 
 
 class CategorySummary(models.Model):
@@ -93,12 +92,16 @@ class PurchaseReportEntry(models.Model):
     def __str__(self):
         return f"Purchase Report for Order {self.order.id}"
 
-# store completed sales
+
 class StockReportEntry(models.Model):
-    alert = models.OneToOneField("inventory.LowStockAlert", on_delete=models.CASCADE)
+    alert = models.OneToOneField(
+        LowStockAlert,                     # ✅ direct relation to LowStockAlert
+        on_delete=models.CASCADE,
+        related_name="report_entry"
+    )
     product_name = models.CharField(max_length=255)
-    quantity = models.IntegerField()
+    quantity = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Stock Report for {self.product_name}"
+        return f"Stock Report for {self.product_name} (qty {self.quantity})"
