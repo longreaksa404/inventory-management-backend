@@ -9,7 +9,8 @@ class RegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = [
-            'id', 'email', 'first_name', 'last_name', 'username', 'phone_number', 'role', 'is_staff', 'password', 'password2'
+            'id', 'email', 'first_name', 'last_name', 'username', 'phone_number', 'role', 'is_staff', 'password',
+            'password2'
         ]
 
     # check validate if pw dose not much

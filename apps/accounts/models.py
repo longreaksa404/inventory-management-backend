@@ -3,6 +3,7 @@ from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 
+
 # customize for create user
 class CustomUserManager(BaseUserManager):
     # for general user
@@ -67,7 +68,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150)
     username = models.CharField(max_length=255, unique=True)
-    phone_number = PhoneNumberField(region='KH',blank=False, null=False)
+    phone_number = PhoneNumberField(region='KH', blank=False, null=False)
     role = models.CharField(max_length=255, choices=ROLE_CHOICES, default='staff')
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)

@@ -3,12 +3,13 @@ from django.core import mail
 from django.db import transaction
 from apps.reports.models import LowStockAlert
 from apps.inventory.models import Product, Category
-from apps.warehouses.models import Warehouse   # ✅ import Warehouse
+from apps.warehouses.models import Warehouse
+
 
 @pytest.mark.django_db
 def test_celery_runs_after_commit():
     category = Category.objects.create(name="Default Category")
-    warehouse = Warehouse.objects.create(name="Main Warehouse", location="Phnom Penh")  # ✅ required
+    warehouse = Warehouse.objects.create(name="Main Warehouse", location="Phnom Penh")
 
     product = Product.objects.create(
         name="Firewall",
@@ -21,10 +22,10 @@ def test_celery_runs_after_commit():
     with transaction.atomic():
         LowStockAlert.objects.create(
             product=product,
-            warehouse=warehouse,        # ✅ must include warehouse
-            quantity=product.quantity,  # ✅ include quantity
+            warehouse=warehouse,
+            quantity=product.quantity,
             reorder_level=5
         )
-        assert len(mail.outbox) == 1  # not sent yet
+        assert len(mail.outbox) == 1
 
-    assert len(mail.outbox) == 1  # sent after commit
+    assert len(mail.outbox) == 1

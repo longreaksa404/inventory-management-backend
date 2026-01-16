@@ -18,8 +18,8 @@ def test_stock_report_entry_created_on_alert():
 
     alert = LowStockAlert.objects.create(
         product=product,
-        warehouse=warehouse,          # ✅ required
-        quantity=product.quantity,    # ✅ required
+        warehouse=warehouse,
+        quantity=product.quantity,
         reorder_level=5
     )
 
@@ -48,12 +48,11 @@ def test_stock_report_entry_not_duplicated():
         reorder_level=4
     )
 
-    alert.save()  # save again → signal fires again
+    alert.save()
 
     assert StockReportEntry.objects.filter(alert=alert).count() == 1
 
 
-# Testing Signal + Celery Together
 @pytest.mark.django_db
 def test_low_stock_full_flow():
     warehouse = Warehouse.objects.create(name="Main Warehouse", location="Phnom Penh")

@@ -1,6 +1,7 @@
 import pytest
 from apps.inventory.models import Product
 
+
 @pytest.mark.django_db
 def test_create_product(product):
     assert product.name == "Laptop"
@@ -29,7 +30,7 @@ def test_product_sku_unique(category):
     with pytest.raises(Exception):
         Product.objects.create(
             name="Keyboard",
-            sku="MOU123",  # duplicate
+            sku="MOU123",
             price=30,
             quantity=5,
             category=category

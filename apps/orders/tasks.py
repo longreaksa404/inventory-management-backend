@@ -3,6 +3,7 @@ from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
+
 @shared_task(
     bind=True,
     autoretry_for=(Exception,),
@@ -11,7 +12,6 @@ from django.utils import timezone
     retry_jitter=True,
 )
 def process_sales_order_shipping(self, order_id, user_id):
-
     from apps.orders.models import SaleOrder, OrderStatusHistory
     from django.contrib.auth import get_user_model
 

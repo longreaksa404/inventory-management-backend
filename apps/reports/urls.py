@@ -11,19 +11,16 @@ from apps.reports.views import (
     StockReportEntryViewSet,
 )
 
-# Router for ViewSets (auto-generates list/retrieve routes)
 router = DefaultRouter()
 router.register(r"sales-report-entries", SalesReportEntryViewSet, basename="sales-report")
 router.register(r"purchase-report-entries", PurchaseReportEntryViewSet, basename="purchase-report")
 router.register(r"stock-report-entries", StockReportEntryViewSet, basename="stock-report")
 
 urlpatterns = [
-    # APIViews (explicit, custom reports)
     path("inventory-value/", InventoryValueReportView.as_view(), name="inventory-value-report"),
     path("low-stock/", LowStockReportView.as_view(), name="low-stock-report"),
     path("category-summary/", CategorySummaryReportView.as_view(), name="category-summary-report"),
     path("transaction-history/", TransactionHistoryReportView.as_view(), name="transaction-history-report"),
 
-    # Include router-generated URLs for ViewSets
     path("", include(router.urls)),
 ]

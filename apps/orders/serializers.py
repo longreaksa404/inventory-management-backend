@@ -10,10 +10,6 @@ from apps.inventory.models import Product
 from apps.suppliers.models import Supplier
 
 
-# -----------------------------
-# Purchase Order Serializers
-# -----------------------------
-
 class PurchaseOrderItemSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.name', read_only=True)
     line_total = serializers.SerializerMethodField()
@@ -75,10 +71,6 @@ class PurchaseOrderSerializer(serializers.ModelSerializer):
         return instance
 
 
-# -----------------------------
-# Sales Order Serializers
-# -----------------------------
-
 class SalesOrderItemSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.name', read_only=True)
     line_total = serializers.SerializerMethodField()
@@ -109,7 +101,6 @@ class SalesOrderSerializer(serializers.ModelSerializer):
         read_only_fields = ['order_date', 'created_at', 'updated_at', 'created_by']
 
     def validate(self, data):
-        # Case 1: completing an existing order without items in payload (PATCH status only)
         if data.get("status") == "completed" and "items" not in data:
             instance = getattr(self, "instance", None)
             if instance:
@@ -121,7 +112,6 @@ class SalesOrderSerializer(serializers.ModelSerializer):
                             f"(needed {item.quantity}, available {product.quantity})"
                         )
 
-        # Case 2: creating/updating with items in payload
         if data.get("status") == "completed" and "items" in data:
             for item in data["items"]:
                 product = item.get("product")
@@ -149,7 +139,8 @@ class SalesOrderSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("Unit price cannot be negative.")
 
             try:
-                product = Product.objects.get(pk=item['product'].id if isinstance(item['product'], Product) else item['product'])
+                product = Product.objects.get(
+                    pk=item['product'].id if isinstance(item['product'], Product) else item['product'])
             except Product.DoesNotExist:
                 raise serializers.ValidationError(f"Product {item['product']} does not exist.")
             if product.quantity < item['quantity']:
@@ -166,7 +157,6 @@ class SalesOrderSerializer(serializers.ModelSerializer):
             if isinstance(product, int):
                 product = Product.objects.get(pk=product)
             SaleOrderItem.objects.create(order=order, **item)
-        # ⚠️ Do NOT decrement stock here — handled in SaleOrder.ship()
         return order
 
     @transaction.atomic
@@ -177,24 +167,18 @@ class SalesOrderSerializer(serializers.ModelSerializer):
         instance.save()
 
         if items_data is not None:
-            # Reset items
             instance.items.all().delete()
             for item in items_data:
                 product = item['product']
                 if isinstance(product, int):
                     product = Product.objects.get(pk=product)
                 SaleOrderItem.objects.create(order=instance, **item)
-        # ⚠️ Do NOT decrement stock here — handled in SaleOrder.ship()
         return instance
 
-
-# -----------------------------
-# Order Status History Serializer
-# -----------------------------
 
 class OrderStatusHistorySerializer(serializers.ModelSerializer):
     changed_by_name = serializers.CharField(source='changed_by.username', read_only=True)
 
     class Meta:
         model = OrderStatusHistory
-        fields = ['id','order_type','order_id','old_status','new_status','changed_by_name','changed_at']
+        fields = ['id', 'order_type', 'order_id', 'old_status', 'new_status', 'changed_by_name', 'changed_at']

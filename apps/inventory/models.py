@@ -56,6 +56,20 @@ class Product(models.Model):
         self.sku = self.sku.strip().upper()
         super().save(*args, **kwargs)
 
+    def increase_stock(self, qty, user=None):
+        self.quantity += qty
+        self.save()
+
+    def decrease_stock(self, qty, user=None):
+        if qty > self.quantity:
+            raise ValueError("Not enough stock")
+        self.quantity -= qty
+        self.save()
+
+    def adjust_stock(self, qty, reason="", user=None):
+        self.quantity = qty
+        self.save()
+
 
 class StockTransaction(models.Model):
     TRANSACTION_STATUS_CHOICES = (
@@ -117,7 +131,7 @@ class StockTransaction(models.Model):
 
 class LowStockAlert(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE,default=1)
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE, default=1)
     quantity = models.PositiveIntegerField(default=0)
     reorder_level = models.PositiveIntegerField(default=1)
     triggered_at = models.DateTimeField(auto_now_add=True)

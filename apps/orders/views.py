@@ -113,7 +113,6 @@ class SalesOrderViewSet(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         if request.data.get("status") == "completed":
-            # Only validate stock, do not deduct here
             for item in instance.items.all():
                 product = item.product
                 if product.quantity < item.quantity:

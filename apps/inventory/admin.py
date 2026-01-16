@@ -8,12 +8,14 @@ class CategoryAdmin(admin.ModelAdmin):
     search_fields = ('name',)
     ordering = ('name',)
 
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('name', 'sku', 'category', 'price', 'quantity', 'status', 'created_at', 'updated_at')
     list_filter = ('status', 'created_at', 'updated_at')
     search_fields = ('name', 'sku')
     ordering = ('name',)
+
 
 @admin.register(StockTransaction)
 class StockTransactionAdmin(admin.ModelAdmin):

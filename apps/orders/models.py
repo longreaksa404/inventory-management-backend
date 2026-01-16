@@ -74,7 +74,7 @@ class PurchaseOrderItem(models.Model):
     warehouse = models.ForeignKey(
         Warehouse,
         on_delete=models.PROTECT,
-        null=True,  # ✅ allows existing rows to stay empty
+        null=True,
         blank=True
     )
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True,
@@ -119,7 +119,7 @@ class SaleOrder(BaseOrder):
 
         with transaction.atomic():
             for item in self.items.all():
-                product = item.product  # ✅ use relation directly
+                product = item.product
                 if product.quantity < item.quantity:
                     raise ValidationError(f"Not enough stock for {product.name}")
 
@@ -160,7 +160,7 @@ class SaleOrderItem(models.Model):
 
 
 class OrderStatusHistory(models.Model):
-    order_type = models.CharField(max_length=20)  # "purchase" or "sales"
+    order_type = models.CharField(max_length=20)
     order_id = models.PositiveIntegerField()
     old_status = models.CharField(max_length=20)
     new_status = models.CharField(max_length=20)

@@ -11,26 +11,21 @@ def has_perm(user, perm_codename):
 
 class SaleOrderPermission(BasePermission):
     def has_permission(self, request, view):
-        # read only
         if request.method in SAFE_METHODS:
             return has_perm(request.user, "orders.view_saleorder")
 
-        # create sale order
         if view.action == "create":
             return has_perm(request.user, "orders.create_saleorder")
 
         return True
 
     def has_object_permission(self, request, view, obj):
-        # View
         if request.method in SAFE_METHODS:
             return has_perm(request.user, "orders.view_saleorder")
 
-        # Update / delete
         if view.action in ["update", "partial_update", "destroy"]:
             return has_perm(request.user, "orders.change_saleorder")
 
-        # Custom actions
         if view.action == "confirm":
             return has_perm(request.user, "orders.confirm_sale_order")
 
@@ -46,26 +41,21 @@ class SaleOrderPermission(BasePermission):
 class PurchaseOrderPermission(BasePermission):
 
     def has_permission(self, request, view):
-        # Read-only
         if request.method in SAFE_METHODS:
             return has_perm(request.user, "orders.view_purchaseorder")
 
-        # Create PO
         if view.action == "create":
             return has_perm(request.user, "orders.create_purchaseorder")
 
         return True
 
     def has_object_permission(self, request, view, obj):
-        # View
         if request.method in SAFE_METHODS:
             return has_perm(request.user, "orders.view_purchaseorder")
 
-        # Update / delete
         if view.action in ["update", "partial_update", "destroy"]:
             return has_perm(request.user, "orders.change_purchaseorder")
 
-        # Custom actions
         if view.action == "confirm":
             return has_perm(request.user, "orders.confirm_purchase order")
 

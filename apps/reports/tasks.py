@@ -1,6 +1,6 @@
-# apps/reports/tasks.py
 from celery import shared_task
 from apps.inventory.models import Product
+
 
 @shared_task
 def generate_inventory_report():

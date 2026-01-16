@@ -1,5 +1,6 @@
 import pytest
 
+
 @pytest.mark.django_db
 def test_admin_user_role(admin_user):
     assert admin_user.role == "Admin"

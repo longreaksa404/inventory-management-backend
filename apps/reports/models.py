@@ -6,10 +6,6 @@ from apps.orders.models import PurchaseOrder, SaleOrder
 
 
 class InventorySnapshot(models.Model):
-    """
-    Stores periodic snapshots of inventory valuation.
-    Useful for historical reporting.
-    """
     warehouse = models.ForeignKey("warehouses.Warehouse", on_delete=models.CASCADE, null=True, blank=True)
     total_value = models.DecimalField(max_digits=15, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -24,8 +20,8 @@ class InventorySnapshot(models.Model):
 class LowStockAlert(models.Model):
     product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name="low_stock_alerts")
     warehouse = models.ForeignKey("warehouses.Warehouse", on_delete=models.PROTECT, related_name="low_stock_alerts")
-    quantity = models.PositiveIntegerField(default=0)        # ✅ safe default
-    reorder_level = models.PositiveIntegerField(default=1)   # ✅ safe default
+    quantity = models.PositiveIntegerField(default=0)
+    reorder_level = models.PositiveIntegerField(default=1)
     triggered_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -37,9 +33,6 @@ class LowStockAlert(models.Model):
 
 
 class CategorySummary(models.Model):
-    """
-    Aggregated summary of inventory by category.
-    """
     category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name="summaries")
     total_quantity = models.PositiveIntegerField()
     total_value = models.DecimalField(max_digits=15, decimal_places=2)
@@ -53,17 +46,15 @@ class CategorySummary(models.Model):
 
 
 class TransactionHistory(models.Model):
-    """
-    Audit trail of stock transactions (purchase orders, sales orders).
-    """
     TRANSACTION_TYPES = (
         ("purchase", "Purchase Order"),
         ("sale", "Sales Order"),
     )
 
     transaction_type = models.CharField(max_length=20, choices=TRANSACTION_TYPES)
-    order_id = models.PositiveIntegerField()  # links to PurchaseOrder or SaleOrder
-    warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name="transactions", null=True, blank=True)
+    order_id = models.PositiveIntegerField()
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name="transactions", null=True,
+                                  blank=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="transactions")
     status = models.CharField(max_length=20)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -95,7 +86,7 @@ class PurchaseReportEntry(models.Model):
 
 class StockReportEntry(models.Model):
     alert = models.OneToOneField(
-        LowStockAlert,                     # ✅ direct relation to LowStockAlert
+        LowStockAlert,
         on_delete=models.CASCADE,
         related_name="report_entry"
     )

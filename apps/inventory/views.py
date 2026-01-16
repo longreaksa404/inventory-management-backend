@@ -1,8 +1,11 @@
-from rest_framework import permissions, generics, filters, viewsets
+from rest_framework import permissions, generics, filters, viewsets, status
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import Category, Product, StockTransaction, LowStockAlert
 from apps.core.permissions import IsStaffOrReadOnly
 from rest_framework.decorators import action
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 from .serializers import (
     CategorySerializer,
     ProductSerializer,
@@ -80,7 +83,6 @@ class ProductListCreateView(SearchFilterOrderingMixin, generics.ListCreateAPIVie
     serializer_class = ProductSerializer
     permission_classes = [ProductPermission]
 
-
     filterset_fields = ['category', 'status']
     search_fields = ['name', 'sku', 'category__name']
     ordering_fields = ['name', 'sku', 'status', 'quantity', 'price', 'created_at']
@@ -142,4 +144,35 @@ class LowStockAlertViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_fields = ['product', 'triggered_at']
 
 
+class StockInView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
 
+    def post(self, request, pk):
+        product = get_object_or_404(Product, pk=pk)
+        qty = int(request.data.get("quantity", 0))
+        product.increase_stock(qty, user=request.user)
+        return Response({"stock": product.quantity}, status=status.HTTP_200_OK)
+
+
+class StockOutView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        product = get_object_or_404(Product, pk=pk)
+        qty = int(request.data.get("quantity", 0))
+        try:
+            product.decrease_stock(qty, user=request.user)
+            return Response({"stock": product.quantity}, status=status.HTTP_200_OK)
+        except ValueError:
+            return Response({"detail": "Not enough stock"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AdjustStockView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    def post(self, request, pk):
+        product = get_object_or_404(Product, pk=pk)
+        qty = int(request.data.get("quantity", product.quantity))
+        reason = request.data.get("reason", "")
+        product.adjust_stock(qty, reason, user=request.user)
+        return Response({"stock": product.quantity}, status=status.HTTP_200_OK)

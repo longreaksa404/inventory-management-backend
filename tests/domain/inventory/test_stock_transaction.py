@@ -13,7 +13,6 @@ def test_stock_increases(product, warehouse, admin_user):
         performed_by=admin_user
     )
     product.refresh_from_db()
-    # Initial fixture quantity = 10, after IN +5 → 15
     assert product.quantity == 15
 
 
@@ -27,13 +26,11 @@ def test_stock_decreases(product, warehouse, admin_user):
         performed_by=admin_user
     )
     product.refresh_from_db()
-    # Initial fixture quantity = 10, after OUT -3 → 7
     assert product.quantity == 7
 
 
 @pytest.mark.django_db
 def test_stock_adjust_sets_exact_quantity(product, warehouse, admin_user):
-    # Current quantity = 10 (from fixture)
     StockTransaction.objects.create(
         product=product,
         warehouse=warehouse,
@@ -43,7 +40,6 @@ def test_stock_adjust_sets_exact_quantity(product, warehouse, admin_user):
         notes="Stock audit correction"
     )
     product.refresh_from_db()
-    # ADJ should SET quantity, not add/subtract
     assert product.quantity == 7
 
 
@@ -58,13 +54,11 @@ def test_stock_increase_on_receive(product, warehouse, admin_user):
         notes="Stock received"
     )
     product.refresh_from_db()
-    # Initial 10 + 10 → 20
     assert product.quantity == 20
 
 
 @pytest.mark.django_db
 def test_stock_decrease_on_issue(product, warehouse, admin_user):
-    # First add stock
     StockTransaction.objects.create(
         product=product,
         warehouse=warehouse,
@@ -72,7 +66,6 @@ def test_stock_decrease_on_issue(product, warehouse, admin_user):
         quantity=20,
         performed_by=admin_user
     )
-    # Then issue stock
     StockTransaction.objects.create(
         product=product,
         warehouse=warehouse,
@@ -81,7 +74,6 @@ def test_stock_decrease_on_issue(product, warehouse, admin_user):
         performed_by=admin_user
     )
     product.refresh_from_db()
-    # Initial 10 +20 -5 → 25
     assert product.quantity == 25
 
 
@@ -96,7 +88,6 @@ def test_adjust_stock_increase(product, warehouse, admin_user):
         notes="Inventory correction"
     )
     product.refresh_from_db()
-    # ADJ sets quantity exactly to 5
     assert product.quantity == 5
 
 

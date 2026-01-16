@@ -8,7 +8,7 @@ from django.core.mail import send_mail
 def create_stock_report_entry(sender, instance, created, **kwargs):
     if created:
         StockReportEntry.objects.get_or_create(
-            alert=instance,   # ✅ use the LowStockAlert instance directly
+            alert=instance,
             defaults={
                 "product_name": instance.product.name,
                 "quantity": instance.reorder_level,

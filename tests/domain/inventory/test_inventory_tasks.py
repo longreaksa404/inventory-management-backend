@@ -59,7 +59,6 @@ def test_notify_low_stock_retry(mock_send_mail):
         notify_low_stock.apply()
 
 
-
 @pytest.mark.django_db
 @patch("apps.inventory.tasks.send_mail")
 def test_notify_low_stock_email_mocked(mock_send_mail):
@@ -75,5 +74,6 @@ def test_notify_low_stock_email_mocked(mock_send_mail):
     notify_low_stock.apply()
 
     mock_send_mail.assert_called_once()
+
 
 from unittest.mock import patch

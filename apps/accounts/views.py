@@ -9,17 +9,17 @@ from apps.accounts.services import change_password
 from rest_framework.response import Response
 
 
-
-
 class RegisterView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = RegistrationSerializer
     permission_classes = [AllowAny]
 
+
 class AccountsView(generics.ListAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = RegistrationSerializer
     permission_classes = [permissions.IsAdminUser]
+
 
 class ProfileView(generics.RetrieveAPIView):
     serializer_class = RegistrationSerializer
@@ -28,8 +28,8 @@ class ProfileView(generics.RetrieveAPIView):
     def get_object(self):
         return self.request.user
 
-class ChangePasswordView(generics.UpdateAPIView):
 
+class ChangePasswordView(generics.UpdateAPIView):
     serializer_class = ChangePasswordSerializer
     permission_classes = [permissions.IsAuthenticated]
 

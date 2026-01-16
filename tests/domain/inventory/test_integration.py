@@ -14,13 +14,13 @@ def test_low_stock_alert_triggers_email():
         sku="SW001",
         quantity=2,
         price=100,
-        category=category  # ✅ required
+        category=category
     )
 
     alert = LowStockAlert.objects.create(
         product=product,
-        warehouse=warehouse,          # ✅ required
-        quantity=product.quantity,    # ✅ required
+        warehouse=warehouse,
+        quantity=product.quantity,
         reorder_level=5
     )
 

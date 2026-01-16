@@ -11,13 +11,14 @@ from .views import (
     StockSummaryView,
     StockHistoryView,
     LowStockAlertViewSet,
+    StockInView,
+    StockOutView,
+    AdjustStockView,
 )
-
 
 router = DefaultRouter()
 router.register(r"products-actions", ProductViewSet, basename="product-actions")
 router.register(r"low-stock-alerts", LowStockAlertViewSet, basename="low-stock-alerts")
-
 
 urlpatterns = [
     # -------- Categories --------
@@ -33,33 +34,10 @@ urlpatterns = [
     path("stock-summary/", StockSummaryView.as_view(), name="stock-summary"),
     path("stock-history/<int:product_id>/", StockHistoryView.as_view(), name="stock-history"),
 
+    path("products/<int:pk>/stock/in/", StockInView.as_view(), name="stock-in"),
+    path("products/<int:pk>/stock/out/", StockOutView.as_view(), name="stock-out"),
+    path("products/<int:pk>/stock/adjust/", AdjustStockView.as_view(), name="stock-adjust"),
+
     # -------- ViewSets --------
     path("", include(router.urls)),
 ]
-
-
-# use router way
-# from django.urls import path, include
-# from rest_framework.routers import DefaultRouter
-# from .views import (
-#     CategoryViewSet,
-#     ProductViewSet,
-#     StockTransactionViewSet,
-#     StockSummaryView,
-#     StockHistoryView,
-# )
-#
-# # Router for standard CRUD
-# router = DefaultRouter()
-# router.register(r'categories', CategoryViewSet, basename='category')
-# router.register(r'products', ProductViewSet, basename='product')
-# router.register(r'transactions', StockTransactionViewSet, basename='transaction')
-#
-# urlpatterns = [
-#     # Router-generated endpoints
-#     path('', include(router.urls)),
-#
-#     # Custom endpoints
-#     path('stock-summary/', StockSummaryView.as_view(), name='stocks-summary'),
-#     path('stock-history/<int:product_id>/', StockHistoryView.as_view(), name='stock-history'),
-# ]
