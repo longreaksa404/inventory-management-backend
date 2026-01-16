@@ -6,7 +6,7 @@ from django.utils import timezone
 from apps.inventory.models import Product, LowStockAlert
 from apps.suppliers.models import Supplier
 from apps.warehouses.models import Warehouse
-from config import settings
+from django.conf import settings
 
 
 class BaseOrder(models.Model):
