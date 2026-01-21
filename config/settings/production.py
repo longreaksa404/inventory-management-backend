@@ -1,22 +1,27 @@
 from .base import *
 import os
+import dj_database_url
 
 DEBUG = False
 
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
+ALLOWED_HOSTS = [
+    '172.20.10.3',
+    'inventory-management-backend-production-7584.up.railway.app',
+    'localhost',
+    '127.0.0.1'
+]
 
 SECRET_KEY = env("SECRET_KEY")
 
 
 DATABASES = {
-    "default": env.db("DATABASE_URL")
-}
+    'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))}
 
 # Security settings
 SECURE_HSTS_SECONDS = 60 * 60 * 24 * 30
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
-SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = not DEBUG
 SECURE_BROWSER_XSS_FILTER = True
 X_FRAME_OPTIONS = "DENY"
 SECURE_REFERRER_POLICY = "same-origin"
