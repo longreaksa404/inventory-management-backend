@@ -7,7 +7,6 @@ ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 
 SECRET_KEY = env("SECRET_KEY")
 
-ROOT_URLCONF = "config.urls"  # <-- this was missing
 
 DATABASES = {
     "default": env.db("DATABASE_URL")
@@ -42,3 +41,5 @@ CELERY_TASK_EAGER_PROPAGATES = True
 # Static files
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+ROOT_URLCONF = "config.urls"  # <-- this was missing
