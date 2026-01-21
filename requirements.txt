@@ -73,3 +73,4 @@ urllib3==2.6.3; python_version >= '3.9'
 vine==5.1.0; python_version >= '3.6'
 wcwidth==0.2.14; python_version >= '3.6'
 yarl==1.22.0; python_version >= '3.9'
+gunicorn
