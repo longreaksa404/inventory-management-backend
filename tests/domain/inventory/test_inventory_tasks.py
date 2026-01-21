@@ -3,7 +3,7 @@ from django.core import mail
 from apps.inventory.tasks import notify_low_stock
 from apps.inventory.models import Product, Category
 from unittest.mock import patch
-
+from celery.exceptions import Retry
 
 @pytest.mark.django_db
 def test_notify_low_stock_sends_email():
@@ -41,23 +41,22 @@ def test_notify_low_stock_no_products():
 
 
 # failure task retries
-
 @pytest.mark.django_db
 @patch("apps.inventory.tasks.send_mail")
 def test_notify_low_stock_retry(mock_send_mail):
     mock_send_mail.side_effect = Exception("SMTP down")
+
     category = Category.objects.create(name="Default Category")
     Product.objects.create(
         name="Monitor",
         sku="MN001",
         quantity=2,
         price=200,
-        category=category
+        category=category,
     )
 
     with pytest.raises(Exception):
-        notify_low_stock.apply()
-
+        notify_low_stock()
 
 @pytest.mark.django_db
 @patch("apps.inventory.tasks.send_mail")
