@@ -4,7 +4,7 @@ import dj_database_url
 
 DEBUG = False
 
-ALLOWED_HOSTS = [".railway.app", ".up.railway.app", "localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ['*', "inventory-management-backend-production-7584.up.railway.app"]
 
 DATABASES = {
     'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))}
