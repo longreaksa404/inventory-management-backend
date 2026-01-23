@@ -1,5 +1,7 @@
 FROM python:3.12-slim
 
+ENV PYTHONUNBUFFERED=1
+
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y \
@@ -12,9 +14,10 @@ RUN pip install --no-cache-dir -r requirements.txt gunicorn
 
 COPY . .
 
-# Make the startup script executable
+# Make start.sh executable
 RUN chmod +x start.sh
 
 EXPOSE 8000
 
+# Use the start.sh script
 CMD ["./start.sh"]
