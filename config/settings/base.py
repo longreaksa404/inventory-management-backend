@@ -1,6 +1,9 @@
 from datetime import timedelta
 from pathlib import Path
 import environ
+import dj_database_url
+import os
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -15,7 +18,9 @@ DEBUG = env.bool("DEBUG")
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
 
 DATABASES = {
-    "default": env.db("DATABASE_URL")
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL', 'postgres://postgres:postgres@localhost:5432/inventory_db')
+    )
 }
 
 INSTALLED_APPS = [
