@@ -20,7 +20,7 @@ class CustomUserManager(BaseUserManager):
         if not last_name:
             raise ValueError('Users must have a last name')
         if not phone_number:
-            raise ValueError('Users must have a phone number format (+855123456789)')
+            raise ValueError('Users must have a phone number')
 
         email = self.normalize_email(email)
         user = self.model(
@@ -68,14 +68,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150)
     username = models.CharField(max_length=255, unique=True)
-    phone_number = PhoneNumberField(
-        region='KH',
-        blank=False,
-        null=False,
-        error_messages={
-            'invalid': 'The phone number entered is not valid. Please use the format: +855xxxxxxxxx'
-        }
-    )
+    phone_number = PhoneNumberField(region='KH', blank=False, null=False)
     role = models.CharField(max_length=255, choices=ROLE_CHOICES, default='staff')
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
