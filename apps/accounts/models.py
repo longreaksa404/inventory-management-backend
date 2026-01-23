@@ -68,7 +68,14 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150)
     username = models.CharField(max_length=255, unique=True)
-    phone_number = PhoneNumberField(region='KH', blank=False, null=False)
+    phone_number = PhoneNumberField(
+        region='KH',
+        blank=False,
+        null=False,
+        error_messages={
+            'invalid': 'The phone number entered is not valid. Please use the format: +855xxxxxxxxx'
+        }
+    )
     role = models.CharField(max_length=255, choices=ROLE_CHOICES, default='staff')
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
