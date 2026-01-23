@@ -15,8 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt gunicorn
 # Copy project files
 COPY . .
 
-# Expose the port (optional, but good practice)
-EXPOSE 8000
-
-# Use shell form to allow $PORT substitution
-CMD python manage.py collectstatic --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+# Run migrations, collect static files, and start gunicorn
+CMD python manage.py migrate && \
+    python manage.py collectstatic --noinput && \
+    gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --timeout 120 --workers 2

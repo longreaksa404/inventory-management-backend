@@ -4,7 +4,7 @@ import dj_database_url
 
 DEBUG = False
 
-ALLOWED_HOSTS = [".railway.app"]
+ALLOWED_HOSTS = [".railway.app", ".up.railway.app", "localhost", "127.0.0.1"]
 
 DATABASES = {
     'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))}
@@ -39,4 +39,4 @@ CELERY_TASK_EAGER_PROPAGATES = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-ROOT_URLCONF = "config.urls"  # <-- this was missing
+ROOT_URLCONF = "config.urls"
