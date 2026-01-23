@@ -20,7 +20,7 @@ class CustomUserManager(BaseUserManager):
         if not last_name:
             raise ValueError('Users must have a last name')
         if not phone_number:
-            raise ValueError('Users must have a phone number')
+            raise ValueError('Users must have a phone number format (+855123456789)')
 
         email = self.normalize_email(email)
         user = self.model(
