@@ -1,15 +1,1 @@
-#!/bin/bash
-set -e
-
-# Fallback to 8000 if PORT is not set
-APP_PORT="${PORT:-8000}"
-
-echo "Running migrations..."
-python manage.py migrate
-
-echo "Collecting static files..."
-python manage.py collectstatic --noinput
-
-echo "Starting Gunicorn on port $APP_PORT..."
-# Using the variable directly ensures the shell replaces it with the number
-exec gunicorn config.wsgi:application --bind 0.0.0.0:"$APP_PORT" --workers 2 --timeout 120
+#!/bin/bashset -e# Define a local variable to hold the port# This ensures that even if PORT is empty, it defaults to 8000APP_PORT="${PORT:-8000}"echo "Running migrations..."python manage.py migrateecho "Collecting static files..."python manage.py collectstatic --noinputecho "Starting Gunicorn on port $APP_PORT..."# Using "$APP_PORT" here forces the shell to expand the valueexec gunicorn config.wsgi:application --bind 0.0.0.0:"$APP_PORT" --workers 2 --timeout 120
