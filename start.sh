@@ -1,1 +1,12 @@
-#!/bin/bashset -e# Define a local variable to hold the port# This ensures that even if PORT is empty, it defaults to 8000APP_PORT="${PORT:-8000}"echo "Running migrations..."python manage.py migrateecho "Collecting static files..."python manage.py collectstatic --noinputecho "Starting Gunicorn on port $APP_PORT..."# Using "$APP_PORT" here forces the shell to expand the valueexec gunicorn config.wsgi:application --bind 0.0.0.0:"$APP_PORT" --workers 2 --timeout 120
+#!/bin/bash
+set -e
+
+echo "Running migrations..."
+python manage.py migrate --noinput
+
+echo "Collecting static files..."
+python manage.py collectstatic --noinput
+
+# Railway provides the $PORT variable automatically
+echo "Starting Gunicorn on port ${PORT}..."
+exec gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 2 --timeout 120
