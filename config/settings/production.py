@@ -6,9 +6,6 @@ DEBUG = False
 
 ALLOWED_HOSTS = [".railway.app"]
 
-SECRET_KEY = env("SECRET_KEY")
-
-
 DATABASES = {
     'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))}
 
