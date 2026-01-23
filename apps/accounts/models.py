@@ -1,8 +1,7 @@
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
-from phonenumber_field.modelfields import PhoneNumberField
-
+from django.core.validators import RegexValidator
 
 # customize for create user
 class CustomUserManager(BaseUserManager):
@@ -68,13 +67,15 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150)
     username = models.CharField(max_length=255, unique=True)
-    phone_number = PhoneNumberField(
-        region='KH',
+    phone_validator = RegexValidator(
+        regex=r'^\+855\d{8,9}$',
+        message="The phone number entered is not valid. Please use format (+855xxxxxxxx)"
+    )
+    phone_number = models.CharField(
+        validators=[phone_validator],
+        max_length=13,
         blank=False,
-        null=False,
-        error_messages={
-            'invalid': ("The phone number entered is not valid. Please use format (+855xxxxxxxx)")
-        }
+        null=False
     )
     role = models.CharField(max_length=255, choices=ROLE_CHOICES, default='staff')
     is_staff = models.BooleanField(default=False)
