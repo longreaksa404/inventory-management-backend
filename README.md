@@ -126,7 +126,7 @@
 
  ### 1️⃣ Clone the repository 
  ```bash 
- git clone https://github.com/longchanreaksa/inventory-management-backend.git 
+ git clone https://github.com/longreaksa404/inventory-management-backend.git 
  cd inventory-management-backend 
  ``` 
 
