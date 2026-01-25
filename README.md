@@ -1,181 +1,95 @@
- # Inventory Management System (Backend) 
+# 📦 Inventory Management System (IMS) - Backend
 
- A **production-ready Inventory Management System backend** built with **Django & Django REST Framework**.   
- Designed around **real business workflows**, **clean backend architecture**, and **scalability**, not just CRUD APIs. 
+**A production-ready, high-integrity backend service built with Django & DRF.**
 
- This project demonstrates how a **serious backend system** is structured, secured, tested, and prepared for deployment. 
+This system is designed around **real-world business workflows**, ensuring data consistency across multiple warehouses, managing complex order lifecycles, and maintaining a strict audit trail of every stock movement.
 
- --- 
+---
 
- ## 🚀 Overview 
+## 🔗 Quick Links
+* **Live API:** [Production URL](https://inventory-management-backend-production-7584.up.railway.app/)
+* **Interactive Docs:** [Swagger UI](https://inventory-management-backend-production-7584.up.railway.app/swagger/) | [Redoc](https://inventory-management-backend-production-7584.up.railway.app/redoc/)
 
- This system manages **users, roles, suppliers, warehouses, inventory, orders, and reports** across multiple locations. 
+---
 
- It focuses on: 
- - Real-world domain modeling 
- - Strong authorization & permissions 
- - Async processing & background jobs 
- - Data consistency using transactions 
- - Production-ready configuration & logging 
+## 🏗️ Architectural Highlights
 
- Built as a **portfolio-grade backend project** suitable for: 
- - Job applications 
- - Technical interviews 
- - Small–medium business systems 
- - Backend architecture review 
+### 1. Data Integrity & Transactions
+Inventory systems fail if stock levels go out of sync. I implemented **atomic database transactions** to ensure that stock deduction and transaction logging either succeed together or fail together-preventing "ghost" inventory.
 
- --- 
+### 2. Scalable RBAC (Role-Based Access Control)
+Instead of simple boolean flags, the system uses a structured role system:
+* **Admins:** Full system control.
+* **Managers:** Warehouse and stock oversight.
+* **Staff:** Operational tasks (orders, stock updates).
 
- ## 🔑 Key Features 
+### 3. Async-First Background Tasks
+To keep the API responsive, heavy operations are offloaded to **Celery & Redis**:
+* **Email Notifications:** Dispatched via background workers.
+* **Stock Alerts:** Automated checks for low-stock items via Celery Beat.
+* **Audit Logging:** System-wide triggers for tracking every change.
 
- ### 🔐 Authentication & Authorization 
- - JWT authentication (access & refresh tokens) 
- - Custom user model 
- - Role-based access control (RBAC) 
- - Permission checks enforced across all endpoints 
+---
 
- ### 📦 Inventory & Warehouse Management 
- - Multi-warehouse stock tracking 
- - Stock movement history & audit trail 
- - Low-stock detection 
- - Data consistency using database transactions 
+## 🛠 Tech Stack & Why I Chose Them
+* **Django 5.2 & DRF:** Chosen for the robust ORM and mature security features required for high-stakes inventory data.
+* **PostgreSQL:** Essential for its support of complex relationships and ACID compliance.
+* **Celery + Redis:** To handle the distributed nature of modern backend services.
+* **Pytest:** Used for a comprehensive suite of **35 tests** covering Unit, Integration, and Async logic.
 
- ### 🧾 Orders & Suppliers 
- - Purchase & sales order workflows 
- - Supplier management 
- - Order lifecycle & status validation 
- - Permission-based order operations 
+---
 
- ### ⚙️ Async & Background Processing 
- - Celery + Redis for background jobs 
- - Email notifications handled asynchronously 
- - Scheduled tasks using Celery Beat 
- - Task monitoring via Flower 
+## 📊 Business Logic Flow
 
- ### 🔔 System Automation 
- - Django signals for side effects 
- - Automated stock updates 
- - Notification triggers on key events 
+```mermaid
+graph TD
+    A[Customer Order] --> B{RBAC Check}
+    B -- Authorized --> C[Transaction Start]
+    C --> D[Stock Availability Check]
+    D -- In Stock --> E[Deduct Stock & Create Audit Trail]
+    E --> F[Commit Transaction]
+    F --> G[Async: Trigger Email via Celery]
+    D -- Out of Stock --> H[Rollback & Return Error]
+```
 
- ### 🧪 Testing & Reliability 
- - Unit tests for domain logic 
- - API tests for endpoints 
- - Async task tests 
- - **35 passing tests** across unit → API → async layers 
- - Tests cover critical business flows and failure cases 
+---
 
- ### 🧱 Architecture & Design 
- - Domain-driven app separation 
- - Service & transaction boundaries 
- - Explicit permission and business rule enforcement 
+## 🚀 Key Features
 
- --- 
+- **Multi-Warehouse Tracking** - Real-time stock visibility across different geographical locations.  
+- **Order Lifecycle Management** - Strict state transitions for Purchase and Sales orders.  
+- **Audit Trails** - Permanent history of stock movements (who, what, when, and where).  
+- **Automated Documentation** - Fully typed Swagger and Redoc support.
 
- ## 📊 Database Schema 
+## ⚙️ Engineering & Setup
 
- The system uses a relational PostgreSQL schema designed for data integrity and auditability. 
+### Requirements
+- Docker (Optional but recommended)  
+- Python 3.12+  
+- Redis (for Celery)
 
- ```mermaid 
- erDiagram 
-     CUSTOM-USER ||--o{ ORDER : places 
-     CUSTOM-USER { 
-         string email 
-         string role 
-         string phone_number 
-     } 
-     WAREHOUSE ||--o{ STOCK : contains 
-     INVENTORY-ITEM ||--o{ STOCK : tracked_in 
-     ORDER ||--o{ ORDER-ITEM : contains 
-     INVENTORY-ITEM ||--o{ ORDER-ITEM : ordered 
-     SUPPLIER ||--o{ INVENTORY-ITEM : supplies 
- ``` 
+### Local Development
 
- ## 🔌 API Documentation (Swagger) 
+1. Clone & setup environment:
+```bash
+git clone https://github.com/longreaksa404/inventory-management-backend.git
+cd inventory-management-backend
+cp .env.example .env  # Configure your DB and Redis URLs
+```
 
- Interactive API documentation covering: 
- - Authentication flows 
- - Inventory & order workflows 
- - Permissions & error handling 
+2. Install dependencies and run migrations:
+```bash
+pip install -r requirements.txt
+python manage.py migrate
+```
 
- Swagger UI: 
- - https://inventory-management-backend-production-7584.up.railway.app/swagger/
- - https://inventory-management-backend-production-7584.up.railway.app/redoc/ 
+3. Run tests:
+```bash
+pytest  # Runs 35+ tests including domain logic and async task verification
+```
 
- --- 
+(If using Docker, see the repository's Docker configuration for recommended compose commands.)
 
- ## 🛠 Tech Stack 
+## 🎯 Project Purpose
 
- - **Language**: Python 3.12 
- - **Framework**: Django 5.2, Django REST Framework 
- - **Authentication**: JWT (SimpleJWT)   
- - **Database**: PostgreSQL   
- - **Async**: Celery + Redis   
- - **Task Monitoring**: Flower   
- - **Documentation**: drf-yasg (Swagger)   
- - **Testing**: Pytest, pytest-django, DRF API tests, async & Celery task tests 
- - **Configuration**: Environment-based settings   
-
- ### Run the test suite 
- ```bash 
- pytest 
- ```
-
- --- 
-
- ## ⚙️ Setup & Installation 
-
- ### 1️⃣ Clone the repository 
- ```bash 
- git clone https://github.com/longreaksa404/inventory-management-backend.git 
- cd inventory-management-backend 
- ``` 
-
- ### 2️⃣ Create virtual environment 
- ```bash 
- python -m venv venv 
- source venv/bin/activate   # Linux / macOS 
- # venv\Scripts\activate    # Windows 
- ``` 
-
- ### 3️⃣ Install dependencies 
- ```bash 
- pip install -r requirements.txt 
- ``` 
-
- ### 4️⃣ Environment variables 
- ```bash 
- cp .env.example .env 
- ``` 
- Fill in required values (database, secret key, Redis, email). 
-
- ### 5️⃣ Run migrations & server 
- ```bash 
- python manage.py migrate 
- python manage.py createsuperuser 
- python manage.py runserver 
- ``` 
- --- 
-
- ## 🚀 Deployment 
-
- - Environment-based configuration 
- - Production-ready logging 
- - Compatible with VPS / Railway / Render 
- - .env secrets are never committed 
-
- Live API (Production): 
- https://inventory-management-backend-production-7584.up.railway.app/ 
-
- --- 
-
- ## 🎯 Purpose of This Project 
-
- - This project was built to demonstrate: 
- - Real backend engineering decisions 
- - Clean, maintainable Django architecture 
- - Readiness for production environments 
- - Ability to handle async workflows and complex domains 
-
- This is a production-oriented backend project, not a tutorial or demo app. 
-
- --- 
+This repository serves as a demonstration of production-level backend engineering. It focuses on solving hard problems that matter to real systems - handling race conditions, ensuring data consistency, and providing fine-grained security - and is intended as a foundation for small-to-medium enterprise (SME) inventory systems.
