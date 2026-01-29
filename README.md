@@ -7,7 +7,7 @@ This system is designed around **real-world business workflows**, ensuring data 
 ---
 
 ## 🔗 Quick Links
-* **Live API:** [Production URL](https://inventory-management-backend-production-7584.up.railway.app/)
+* **Live API:** [Production URL](https://inventory-management-backend-production-7584.up.railway.app/admin/)
 * **Interactive Docs:** [Swagger UI](https://inventory-management-backend-production-7584.up.railway.app/swagger/) | [Redoc](https://inventory-management-backend-production-7584.up.railway.app/redoc/)
 
 ---
