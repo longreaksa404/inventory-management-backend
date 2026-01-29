@@ -3,9 +3,8 @@ from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 from django.core.validators import RegexValidator
 
-# customize for create user
+
 class CustomUserManager(BaseUserManager):
-    # for general user
     def create_user(
             self, email, first_name, last_name, username,
             phone_number=None, password=None, role='staff', **extra_fields
