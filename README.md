@@ -9,7 +9,7 @@ This system is designed around **real-world business workflows**, ensuring data 
 ## 🔗 Quick Links
 * **Admin Dashboard:** [Production URL](https://inventory-management-backend-production-7584.up.railway.app/admin/)
 * **Interactive Docs:** [Swagger UI](https://inventory-management-backend-production-7584.up.railway.app/swagger/) | [Redoc](https://inventory-management-backend-production-7584.up.railway.app/redoc/)
-* **Use /api/v1/ Before Every Endpoints:** [Example Of Accounts URL](https://inventory-management-backend-production-7584.up.railway.app/api/v1/accounts/)
+* **Use /api/v1/ Before Every Endpoints:** [Example Of Accounts URL](https://inventory-management-backend-production-7584.up.railway.app/api/v1/accounts/login/)
 ---
 
 ## 🏗️ Architectural Highlights
