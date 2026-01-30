@@ -10,13 +10,15 @@ class CustomUserAdmin(UserAdmin):
     list_display = ("email", "username", "role", "is_staff", "is_superuser")
     list_filter = ("role", "is_staff", "is_superuser")
 
+    # group fields
     fieldsets = (
-        (None, {"fields": ("email", "password")}),
+        (None, {"fields": ("email", "password")}), # login section
         ("Personal info", {"fields": ("username", "first_name", "last_name", "phone_number")}),
         ("Permissions", {"fields": ("role", "is_staff", "is_superuser", "groups", "user_permissions")}),
         ("Important dates", {"fields": ("last_login",)}),
     )
 
+    # custom field for register new user
     add_fieldsets = (
         (None, {
             "classes": ("wide",),

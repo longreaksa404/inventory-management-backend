@@ -9,6 +9,7 @@ class CustomUserManager(BaseUserManager):
             self, email, first_name, last_name, username,
             phone_number=None, password=None, role='staff', **extra_fields
     ):
+        # require field validation
         if not email:
             raise ValueError('Users must have an email address')
         if not username:
@@ -20,8 +21,8 @@ class CustomUserManager(BaseUserManager):
         if not phone_number:
             raise ValueError('Users must have a phone number')
 
-        email = self.normalize_email(email)
-        user = self.model(
+        email = self.normalize_email(email)  # converting gmail format
+        user = self.model( # model class
             email=email,
             first_name=first_name,
             last_name=last_name,
@@ -82,7 +83,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(auto_now_add=True)
 
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = 'email' # change username to email
 
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name', 'phone_number']
 
