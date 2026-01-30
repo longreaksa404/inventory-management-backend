@@ -36,23 +36,15 @@ class CustomUserManager(BaseUserManager):
         return user
 
     # for superuser
-    def create_superuser(
-            self, email, first_name, last_name, username,
-            phone_number=None, password=None, **extra_fields
-    ):
+    def create_superuser(self, email, first_name, last_name, username, phone_number=None, password=None,
+                         **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
-        role = 'admin'
+        extra_fields.setdefault('is_active', True)
 
         return self.create_user(
-            email=email,
-            first_name=first_name,
-            last_name=last_name,
-            username=username,
-            phone_number=phone_number,
-            password=password,
-            role='admin',
-            **extra_fields
+            email, first_name, last_name, username,
+            phone_number, password, role='admin', **extra_fields
         )
 
 
