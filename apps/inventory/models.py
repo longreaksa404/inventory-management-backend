@@ -104,9 +104,11 @@ class StockTransaction(models.Model):
         return f"{self.get_transaction_type_display()} - {self.product.name} ({self.quantity})"
 
     def clean(self):
+        # stock not enough
         if self.transaction_type == 'OUT' and self.product.quantity < self.quantity:
             raise ValidationError("Not enough stock to complete transaction")
 
+        # only admin can adj stock
         if self.transaction_type == "ADJ" and getattr(self.performed_by, "role", None) != "Admin":
             raise PermissionError("Only admins can adjust stock")
         super().clean()
@@ -123,6 +125,7 @@ class StockTransaction(models.Model):
         self.product.save()
 
     def save(self, *args, **kwargs):
+        # check validation data
         self.full_clean()
         with transaction.atomic():
             super().save(*args, **kwargs)
@@ -146,11 +149,11 @@ class LowStockAlert(models.Model):
         return f"{self.product.name} low stock ({self.quantity}/{self.reorder_level})"
 
 
-class StockReportEntry(models.Model):
-    alert = models.OneToOneField(LowStockAlert, on_delete=models.CASCADE, related_name="report_entry")
-    product_name = models.CharField(max_length=255)
-    quantity = models.PositiveIntegerField()
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Report for {self.product_name} (qty {self.quantity})"
+# class StockReportEntry(models.Model):
+#     alert = models.OneToOneField(LowStockAlert, on_delete=models.CASCADE, related_name="report_entry")
+#     product_name = models.CharField(max_length=255)
+#     quantity = models.PositiveIntegerField()
+#     created_at = models.DateTimeField(auto_now_add=True)
+#
+#     def __str__(self):
+#         return f"Report for {self.product_name} (qty {self.quantity})"
