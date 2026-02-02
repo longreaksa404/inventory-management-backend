@@ -1,6 +1,8 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
+# basepermission for decide if the user is allowed
+# SAFE_METHODS standard read only method
 
-
+# helper func (auth check   )
 def has_perm(user, perm):
     if not user or not user.is_authenticated:
         return False

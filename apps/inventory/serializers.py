@@ -1,5 +1,5 @@
 from statistics import quantiles
-from decimal import Decimal
+from decimal import Decimal # exact values
 from rest_framework import serializers
 from .models import Category, Product, StockTransaction, LowStockAlert
 
@@ -12,6 +12,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    # StringRelatedField to show __str__ value
     category_name = serializers.StringRelatedField(source='category', read_only=True)
     price = serializers.DecimalField(
         max_digits=10,
@@ -41,8 +42,8 @@ class StockTransactionSerializer(serializers.ModelSerializer):
         read_only_fields = ['performed_by', 'timestamp']
 
     def create(self, validated_data):
-        user = self.context['request'].user
-        validated_data['performed_by'] = user
+        user = self.context['request'].user # get current user if auth allowed
+        validated_data['performed_by'] = user # who create
         transaction = super().create(validated_data)
         transaction.apply_transaction()
         return transaction
@@ -76,7 +77,7 @@ class StockHistorySerializer(serializers.ModelSerializer):
         ]
 
 
-class LowStockAlertSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = LowStockAlert
-        fields = "__all__"
+# class LowStockAlertSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = LowStockAlert
+#         fields = "__all__"
