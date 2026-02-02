@@ -78,7 +78,7 @@ class PurchaseOrderItem(models.Model):
         blank=True
     )
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True,
-                                   blank=True)  # ✅ add this
+                                   blank=True)
     quantity = models.PositiveIntegerField(validators=[MinValueValidator(1)])
     unit_price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
     notes = models.TextField(blank=True)

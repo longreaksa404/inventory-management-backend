@@ -77,7 +77,7 @@ class StockHistorySerializer(serializers.ModelSerializer):
         ]
 
 
-# class LowStockAlertSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = LowStockAlert
-#         fields = "__all__"
+class LowStockAlertSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LowStockAlert
+        fields = "__all__"
