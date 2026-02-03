@@ -21,15 +21,12 @@ router.register(r"products-actions", ProductViewSet, basename="product-actions")
 router.register(r"low-stock-alerts", LowStockAlertViewSet, basename="low-stock-alerts")
 
 urlpatterns = [
-    # -------- Categories --------
     path("categories/", CategoryListCreateView.as_view(), name="category-list-create"),
     path("categories/<int:pk>/", CategoryDetailView.as_view(), name="category-detail"),
 
-    # -------- Products (CRUD) --------
     path("products/", ProductListCreateView.as_view(), name="product-list-create"),
     path("products/<int:pk>/", ProductDetailView.as_view(), name="product-detail"),
 
-    # -------- Stock --------
     path("transactions/", StockTransactionListCreateView.as_view(), name="transaction-list-create"),
     path("stock-summary/", StockSummaryView.as_view(), name="stock-summary"),
     path("stock-history/<int:product_id>/", StockHistoryView.as_view(), name="stock-history"),
@@ -38,6 +35,5 @@ urlpatterns = [
     path("products/<int:pk>/stock/out/", StockOutView.as_view(), name="stock-out"),
     path("products/<int:pk>/stock/adjust/", AdjustStockView.as_view(), name="stock-adjust"),
 
-    # -------- ViewSets --------
     path("", include(router.urls)),
 ]
