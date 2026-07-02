@@ -2,6 +2,7 @@
 from .base import *
 import os
 import dj_database_url
+import ssl
 
 DEBUG = False
 
@@ -60,8 +61,8 @@ CELERY_TASK_ALWAYS_EAGER = False
 CELERY_TASK_EAGER_PROPAGATES = True
 
 if CELERY_BROKER_URL.startswith('rediss://'):
-    CELERY_BROKER_USE_SSL = {'ssl_cert_reqs': None}
-    CELERY_REDIS_BACKEND_USE_SSL = {'ssl_cert_reqs': None}
+    CELERY_BROKER_USE_SSL = {'ssl_cert_reqs': ssl.CERT_NONE}
+    CELERY_REDIS_BACKEND_USE_SSL = {'ssl_cert_reqs': ssl.CERT_NONE}
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / "staticfiles"
