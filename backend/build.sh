@@ -3,6 +3,7 @@ set -o errexit
 pip install -r requirements.txt
 python manage.py collectstatic --no-input
 python manage.py migrate --no-input
+python manage.py setup_rbac_groups
 
 if [ "$CREATE_SUPERUSER" = "True" ]; then
     python manage.py shell -c "
