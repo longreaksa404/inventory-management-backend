@@ -34,7 +34,7 @@ function StockBadge({ quantity, reorderLevel }: { quantity: number; reorderLevel
   if (quantity <= reorderLevel) {
     return (
       <span className="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-600">
-        Low — {quantity}
+        Low - {quantity}
       </span>
     )
   }
@@ -509,7 +509,7 @@ export default function ProductsPage() {
 
       {/* Create / Edit modal */}
       {showForm && (
-        <Modal title={editing ? `Edit — ${editing.name}` : "Add product"} onClose={closeForm}>
+        <Modal title={editing ? `Edit - ${editing.name}` : "Add product"} onClose={closeForm}>
           <ProductForm editing={editing} categories={categories} onClose={closeForm} />
         </Modal>
       )}
