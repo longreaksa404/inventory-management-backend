@@ -63,3 +63,5 @@ def test_unauthenticated_profile_access_denied():
     client = APIClient()
     response = client.get("/api/v1/accounts/profile/")
     assert response.status_code == 401
+
+##
