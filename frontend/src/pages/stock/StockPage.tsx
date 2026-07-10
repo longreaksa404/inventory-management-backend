@@ -311,7 +311,7 @@ function AdjustStockForm({ onClose }: { onClose: () => void }) {
 type ModalMode = "IN" | "OUT" | "ADJ" | null
 
 export default function StockPage() {
-  const { isAdmin } = useAuth()
+  const { hasPermission } = useAuth()
   const [page, setPage] = useState(1)
   const [filterProduct, setFilterProduct] = useState("")
   const [filterWarehouse, setFilterWarehouse] = useState("")
@@ -352,21 +352,25 @@ export default function StockPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setModal("IN")}
-            className="flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700 transition-colors"
-          >
-            <ArrowDownToLine className="h-3.5 w-3.5" />
-            Stock In
-          </button>
-          <button
-            onClick={() => setModal("OUT")}
-            className="flex items-center gap-1.5 rounded-lg bg-red-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-600 transition-colors"
-          >
-            <ArrowUpFromLine className="h-3.5 w-3.5" />
-            Stock Out
-          </button>
-          {isAdmin && (
+          {hasPermission("inventory.create_stock_transaction") && (
+            <>
+              <button
+                onClick={() => setModal("IN")}
+                className="flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700 transition-colors"
+              >
+                <ArrowDownToLine className="h-3.5 w-3.5" />
+                Stock In
+              </button>
+              <button
+                onClick={() => setModal("OUT")}
+                className="flex items-center gap-1.5 rounded-lg bg-red-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-600 transition-colors"
+              >
+                <ArrowUpFromLine className="h-3.5 w-3.5" />
+                Stock Out
+              </button>
+            </>
+          )}
+          {hasPermission("inventory.adjust_stock") && (
             <button
               onClick={() => setModal("ADJ")}
               className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
@@ -512,7 +516,7 @@ export default function StockPage() {
           <StockMutationForm mode="OUT" onClose={() => setModal(null)} />
         </Modal>
       )}
-      {modal === "ADJ" && isAdmin && (
+      {modal === "ADJ" && hasPermission("inventory.adjust_stock") && (
         <Modal title="Adjust Stock" onClose={() => setModal(null)}>
           <AdjustStockForm onClose={() => setModal(null)} />
         </Modal>
