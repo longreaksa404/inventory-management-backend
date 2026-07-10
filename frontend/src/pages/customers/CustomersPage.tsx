@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Plus, Pencil, X, Users, Search, Power } from "lucide-react"
 import { customersApi } from "@/api/customers"
+import { useAuth } from "@/hooks/useAuth"
 import type { Customer } from "@/types"
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
@@ -171,6 +172,7 @@ export function CustomerForm({
 
 export default function CustomersPage() {
   const queryClient = useQueryClient()
+  const { hasPermission } = useAuth()
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [showForm, setShowForm] = useState(false)
@@ -280,19 +282,23 @@ export default function CustomersPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1">
-                      <button
-                        onClick={() => openEdit(c)}
-                        className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </button>
-                      <button
-                        onClick={() => toggleActiveMutation.mutate({ id: c.id, is_active: !c.is_active })}
-                        title={c.is_active ? "Deactivate" : "Reactivate"}
-                        className="rounded-md p-1.5 text-muted-foreground hover:bg-amber-50 hover:text-amber-600 transition-colors"
-                      >
-                        <Power className="h-3.5 w-3.5" />
-                      </button>
+                      {hasPermission("accounts.manage_customers") && (
+                        <button
+                          onClick={() => openEdit(c)}
+                          className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                      {hasPermission("accounts.manage_customers") && (
+                        <button
+                          onClick={() => toggleActiveMutation.mutate({ id: c.id, is_active: !c.is_active })}
+                          title={c.is_active ? "Deactivate" : "Reactivate"}
+                          className="rounded-md p-1.5 text-muted-foreground hover:bg-amber-50 hover:text-amber-600 transition-colors"
+                        >
+                          <Power className="h-3.5 w-3.5" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
