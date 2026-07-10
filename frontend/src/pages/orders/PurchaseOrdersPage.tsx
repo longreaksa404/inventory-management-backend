@@ -22,6 +22,7 @@ import { suppliersApi } from "@/api/suppliers"
 import { warehousesApi } from "@/api/warehouses"
 import type { PurchaseOrder, OrderStatus } from "@/types"
 import { useOrderStatusPolling } from "@/hooks/useOrderStatusPolling"
+import { useAuth } from "@/hooks/useAuth"
 
 // ─── Status badge ─────────────────────────────────────────────────────────────
 
@@ -344,6 +345,7 @@ function OrderRow({
   onReceive: (id: number) => void
   isPolling: boolean
 }) {
+  const { hasPermission } = useAuth()
   const [expanded, setExpanded] = useState(false)
 
   const lineTotal = order.items_detail.reduce(
@@ -381,7 +383,7 @@ function OrderRow({
               </span>
             ) : (
               <>
-                {order.status === "draft" && (
+                {order.status === "draft" && hasPermission("orders.confirm_purchase_order") && (
                   <button
                     onClick={() => onConfirm(order.id)}
                     className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 transition-colors"
@@ -389,7 +391,7 @@ function OrderRow({
                     <CheckCircle className="h-3.5 w-3.5" /> Confirm
                   </button>
                 )}
-                {order.status === "confirmed" && (
+                {order.status === "confirmed" && hasPermission("orders.receive_purchase_order") && (
                   <button
                     onClick={() => onReceive(order.id)}
                     className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-green-600 hover:bg-green-50 transition-colors"
@@ -435,6 +437,7 @@ function OrderRow({
 
 export default function PurchaseOrdersPage() {
   const queryClient = useQueryClient()
+  const { hasPermission } = useAuth()
   const [page, setPage] = useState(1)
   const [statusFilter, setStatusFilter] = useState("")
   const [showCreate, setShowCreate] = useState(false)
@@ -480,12 +483,14 @@ export default function PurchaseOrdersPage() {
           <h1 className="text-xl font-semibold">Purchase Orders</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">{data?.count ?? 0} orders</p>
         </div>
-        <button
-          onClick={() => setShowCreate(true)}
-          className="flex items-center gap-1.5 rounded-lg bg-foreground px-3 py-1.5 text-sm font-medium text-background hover:opacity-90 transition-opacity"
-        >
-          <Plus className="h-4 w-4" /> New order
-        </button>
+        {hasPermission("orders.add_purchaseorder") && (
+          <button
+            onClick={() => setShowCreate(true)}
+            className="flex items-center gap-1.5 rounded-lg bg-foreground px-3 py-1.5 text-sm font-medium text-background hover:opacity-90 transition-opacity"
+          >
+            <Plus className="h-4 w-4" /> New order
+          </button>
+        )}
       </div>
 
       {/* Filter */}
