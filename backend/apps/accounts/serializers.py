@@ -45,14 +45,26 @@ class UserListSerializer(serializers.ModelSerializer):
     writes and includes password fields (write_only=True hides them but it's
     still semantically wrong and fragile). This dedicated read serializer
     only exposes safe, relevant fields.
+
+    `permissions` exposes the user's actual Group-derived permission set
+    (get_all_permissions() also covers superusers automatically via
+    Django's ModelBackend) so the frontend can gate nav/buttons on real
+    backend permissions instead of just `role`, which is independent of
+    Group assignment.
     """
+    permissions = serializers.SerializerMethodField()
+
     class Meta:
         model = CustomUser
         fields = [
             'id', 'email', 'username', 'first_name', 'last_name',
             'phone_number', 'role', 'is_staff', 'is_active', 'date_joined',
+            'permissions',
         ]
         read_only_fields = fields
+
+    def get_permissions(self, obj):
+        return sorted(obj.get_all_permissions())
 
 
 class ChangePasswordSerializer(serializers.Serializer):

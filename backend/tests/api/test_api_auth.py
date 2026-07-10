@@ -64,4 +64,12 @@ def test_unauthenticated_profile_access_denied():
     response = client.get("/api/v1/accounts/profile/")
     assert response.status_code == 401
 
-##
+@pytest.mark.django_db
+def test_profile_includes_permissions(login_api_client, admin_user):
+    response = login_api_client.get("/api/v1/accounts/profile/")
+    assert response.status_code == 200
+    assert "permissions" in response.data
+    assert isinstance(response.data["permissions"], list)
+    # admin_user fixture is is_superuser=True — should carry every permission
+    # that exists for at least one real backend-defined permission
+    assert "inventory.view_product" in response.data["permissions"]
