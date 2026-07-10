@@ -7,6 +7,7 @@ import { z } from "zod"
 import { Plus, Search, Pencil, Trash2, X, ChevronLeft, ChevronRight } from "lucide-react"
 import { productsApi } from "@/api/products"
 import { Link } from "react-router-dom"
+import { useAuth } from "@/hooks/useAuth"
 import type { Product, Category } from "@/types"
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
@@ -297,6 +298,7 @@ function ProductForm({
 
 export default function ProductsPage() {
   const queryClient = useQueryClient()
+  const { hasPermission } = useAuth()
 
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
@@ -360,13 +362,15 @@ export default function ProductsPage() {
             {productsData?.count ?? 0} products in inventory
           </p>
         </div>
-        <button
-          onClick={openCreate}
-          className="flex items-center gap-1.5 rounded-lg bg-foreground px-3 py-1.5 text-sm font-medium text-background hover:opacity-90 transition-opacity"
-        >
-          <Plus className="h-4 w-4" />
-          Add product
-        </button>
+        {hasPermission("inventory.add_product") && (
+          <button
+            onClick={openCreate}
+            className="flex items-center gap-1.5 rounded-lg bg-foreground px-3 py-1.5 text-sm font-medium text-background hover:opacity-90 transition-opacity"
+          >
+            <Plus className="h-4 w-4" />
+            Add product
+          </button>
+        )}
       </div>
 
       {/* Filters */}
@@ -461,18 +465,22 @@ export default function ProductsPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1">
-                      <button
-                        onClick={() => openEdit(product)}
-                        className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </button>
-                      <button
-                        onClick={() => setDeleting(product)}
-                        className="rounded-md p-1.5 text-muted-foreground hover:bg-red-50 hover:text-red-500 transition-colors"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
+                      {hasPermission("inventory.change_product") && (
+                        <button
+                          onClick={() => openEdit(product)}
+                          className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                      {hasPermission("inventory.delete_product") && (
+                        <button
+                          onClick={() => setDeleting(product)}
+                          className="rounded-md p-1.5 text-muted-foreground hover:bg-red-50 hover:text-red-500 transition-colors"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
