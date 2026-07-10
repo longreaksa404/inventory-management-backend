@@ -24,6 +24,7 @@ import type { SaleOrder, OrderStatus } from "@/types"
 import { authApi } from "@/api/auth"
 import { useOrderStatusPolling } from "@/hooks/useOrderStatusPolling"
 import { CustomerForm } from "@/pages/customers/CustomersPage"
+import { useAuth } from "@/hooks/useAuth"
 
 // ─── Status badge ─────────────────────────────────────────────────────────────
 
@@ -381,6 +382,7 @@ function SaleOrderRow({
   onInvoice: (id: number) => void
   isPolling: boolean
 }) {
+  const { hasPermission } = useAuth()
   const [expanded, setExpanded] = useState(false)
 
   const lineTotal = order.items_detail.reduce((sum, item) => sum + Number(item.line_total), 0)
@@ -410,7 +412,7 @@ function SaleOrderRow({
               </span>
             ) : (
               <>
-                {order.status === "draft" && (
+                {order.status === "draft" && hasPermission("orders.confirm_sale_order") && (
                   <button
                     onClick={() => onConfirm(order.id)}
                     className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 transition-colors"
@@ -418,7 +420,7 @@ function SaleOrderRow({
                     <CheckCircle className="h-3.5 w-3.5" /> Confirm
                   </button>
                 )}
-                {order.status === "confirmed" && (
+                {order.status === "confirmed" && hasPermission("orders.ship_sale_order") && (
                   <button
                     onClick={() => onShip(order.id)}
                     className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-indigo-600 hover:bg-indigo-50 transition-colors"
@@ -426,7 +428,7 @@ function SaleOrderRow({
                     <Truck className="h-3.5 w-3.5" /> Ship
                   </button>
                 )}
-                {order.status === "shipped" && (
+                {order.status === "shipped" && hasPermission("orders.invoice_sale_order") && (
                   <button
                     onClick={() => onInvoice(order.id)}
                     className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-purple-600 hover:bg-purple-50 transition-colors"
@@ -479,6 +481,7 @@ function SaleOrderRow({
 
 export default function SaleOrdersPage() {
   const queryClient = useQueryClient()
+  const { hasPermission } = useAuth()
   const [page, setPage] = useState(1)
   const [statusFilter, setStatusFilter] = useState("")
   const [showCreate, setShowCreate] = useState(false)
@@ -526,12 +529,14 @@ export default function SaleOrdersPage() {
           <h1 className="text-xl font-semibold">Sale Orders</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">{data?.count ?? 0} orders</p>
         </div>
-        <button
-          onClick={() => setShowCreate(true)}
-          className="flex items-center gap-1.5 rounded-lg bg-foreground px-3 py-1.5 text-sm font-medium text-background hover:opacity-90 transition-opacity"
-        >
-          <Plus className="h-4 w-4" /> New order
-        </button>
+        {hasPermission("orders.add_saleorder") && (
+          <button
+            onClick={() => setShowCreate(true)}
+            className="flex items-center gap-1.5 rounded-lg bg-foreground px-3 py-1.5 text-sm font-medium text-background hover:opacity-90 transition-opacity"
+          >
+            <Plus className="h-4 w-4" /> New order
+          </button>
+        )}
       </div>
 
       {/* Filter */}
