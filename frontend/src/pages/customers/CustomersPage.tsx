@@ -209,12 +209,15 @@ export default function CustomersPage() {
           <h1 className="text-xl font-semibold">Customers</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">{data?.count ?? 0} customers</p>
         </div>
-        <button
-          onClick={openCreate}
-          className="flex items-center gap-1.5 rounded-lg bg-foreground px-3 py-1.5 text-sm font-medium text-background hover:opacity-90 transition-opacity"
-        >
-          <Plus className="h-4 w-4" /> Add customer
-        </button>
+        {hasPermission("accounts.add_customer") && (
+          <button
+            onClick={openCreate}
+            className="flex items-center gap-1.5 rounded-lg bg-foreground px-3 py-1.5 text-sm font-medium text-background hover:opacity-90 transition-opacity"
+          >
+            <Plus className="h-4 w-4" />
+            Add customer
+          </button>
+        )}
       </div>
 
       <div className="relative max-w-sm">

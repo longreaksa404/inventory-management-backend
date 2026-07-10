@@ -152,6 +152,7 @@ const createSOSchema = z.object({
 
 function CreateSOForm({ onClose }: { onClose: () => void }) {
   const queryClient = useQueryClient()
+  const { hasPermission } = useAuth()
   const [showQuickAddCustomer, setShowQuickAddCustomer] = useState(false)
 
   const { data: customersData } = useQuery({
@@ -238,14 +239,15 @@ function CreateSOForm({ onClose }: { onClose: () => void }) {
                 </option>
               ))}
             </SelectInput>
-            <button
-              type="button"
-              onClick={() => setShowQuickAddCustomer(true)}
-              title="Add new customer"
-              className="flex h-8 shrink-0 items-center justify-center rounded-lg border px-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            >
-              <Plus className="h-3.5 w-3.5" />
-            </button>
+            {hasPermission("accounts.add_customer") && (
+                <button
+                  type="button"
+                  onClick={() => setShowQuickAddCustomer(true)}
+                  className="rounded-md border border-input p-1.5 text-muted-foreground hover:bg-muted transition-colors"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                </button>
+              )}  
           </div>
         </Field>
         <Field label="Warehouse" error={errors.warehouse?.message}>

@@ -1,12 +1,22 @@
 # tests/api/test_api_customers.py
 #
-# Coverage for the Customer management endpoints added in Session 15:
+# Coverage for the Customer management endpoints added in Session 15,
+# updated for the Group-based permission model applied to CustomerPermission.
+#
 #   POST/GET   /api/v1/accounts/customers/
 #   GET/PATCH  /api/v1/accounts/customers/<pk>/
 #
 # Permission model under test (apps/accounts/permissions.py CustomerPermission):
-#   - SAFE_METHODS or POST -> any authenticated user
-#   - PUT/PATCH/DELETE     -> role in ("admin", "manager") only
+#   - GET (list/retrieve)  -> any authenticated user, regardless of Group
+#   - POST (create)        -> requires 'accounts.add_customuser' — Django's
+#                             default auto-generated permission for the
+#                             CustomUser model (there is no separate Customer
+#                             model, so the codename is add_customuser, not
+#                             add_customer). Group-controlled like every
+#                             other model's add_* permission — no longer
+#                             unconditionally open to any authenticated user.
+#   - PUT/PATCH/DELETE      -> requires 'accounts.manage_customers'
+#   - superusers bypass all permission checks above
 #
 # Serializer behavior under test (apps/accounts/serializers.py CustomerSerializer):
 #   - role is force-set server-side to "customer", never accepted from input
@@ -14,18 +24,69 @@
 #   - password is never collected (create_user(password=None, ...))
 
 import pytest
+from django.contrib.auth.models import Permission
 from apps.accounts.models import CustomUser
+
+
+@pytest.fixture
+def staff_user_with_create_perm(staff_user):
+    """
+    staff_user granted 'accounts.add_customuser' directly — stands in for
+    "staff assigned to a Group that includes this permission in the admin
+    panel." Used by tests that exercise the create flow's behavior (role
+    protection, username fallback, etc.) once permission is actually granted.
+    """
+    perm = Permission.objects.get(
+        content_type__app_label="accounts", codename="add_customuser"
+    )
+    staff_user.user_permissions.add(perm)
+    return staff_user
+
+
+@pytest.fixture
+def manager_user_with_manage_perm(manager_user):
+    """manager_user granted 'accounts.manage_customers' directly — stands in
+    for Group assignment via the admin panel (MANAGER_EXTRA_PERMS in
+    setup_rbac_groups.py includes this by default, but fixture users aren't
+    assigned to seeded Groups, so it must be granted explicitly here).
+    """
+    perm = Permission.objects.get(
+        content_type__app_label="accounts", codename="manage_customers"
+    )
+    manager_user.user_permissions.add(perm)
+    return manager_user
 
 
 @pytest.mark.django_db
 class TestCustomerCreate:
 
-    def test_staff_can_create_customer(self, api_client, staff_user):
-        """Any authenticated user — including plain staff — can create a customer.
-        This is the entire point of CustomerPermission: staff need to quick-add
-        a customer directly from the Sale Order form.
+    def test_staff_without_permission_cannot_create_customer(self, api_client, staff_user):
+        """Creation now follows Group permissions like every other model —
+        staff with no 'accounts.add_customuser' permission is blocked. This
+        replaces the old assumption that any authenticated user could create
+        a customer unconditionally.
         """
         api_client.force_authenticate(user=staff_user)
+
+        response = api_client.post(
+            "/api/v1/accounts/customers/",
+            {
+                "first_name": "Jane",
+                "last_name": "Doe",
+                "email": "jane.doe@example.com",
+                "phone_number": "+85512345699",
+            },
+            format="json",
+        )
+
+        assert response.status_code == 403
+
+    def test_staff_with_permission_can_create_customer(self, api_client, staff_user_with_create_perm):
+        """Staff granted 'accounts.add_customuser' via Group (simulated here
+        via a direct permission grant) can create a customer — this is the
+        Group-controlled quick-add path used by the Sale Order form.
+        """
+        api_client.force_authenticate(user=staff_user_with_create_perm)
 
         response = api_client.post(
             "/api/v1/accounts/customers/",
@@ -46,6 +107,9 @@ class TestCustomerCreate:
         assert created.role == "customer"
 
     def test_admin_can_create_customer(self, api_client, admin_user):
+        """admin_user is a superuser — bypasses the permission check entirely,
+        no Group assignment required.
+        """
         api_client.force_authenticate(user=admin_user)
 
         response = api_client.post(
@@ -60,6 +124,26 @@ class TestCustomerCreate:
 
         assert response.status_code == 201
 
+    def test_manager_without_permission_cannot_create_customer(self, api_client, manager_user):
+        """manager_user is is_staff=True but not a superuser, and has no
+        Group/permission assignment in this fixture — creation is blocked
+        exactly like a staff user without the permission. is_staff alone
+        no longer implies customer-create access.
+        """
+        api_client.force_authenticate(user=manager_user)
+
+        response = api_client.post(
+            "/api/v1/accounts/customers/",
+            {
+                "first_name": "No",
+                "last_name": "Perm",
+                "email": "manager.noperm@example.com",
+            },
+            format="json",
+        )
+
+        assert response.status_code == 403
+
     def test_unauthenticated_cannot_create_customer(self, api_client):
         response = api_client.post(
             "/api/v1/accounts/customers/",
@@ -73,11 +157,11 @@ class TestCustomerCreate:
 
         assert response.status_code == 401
 
-    def test_role_cannot_be_overridden_from_input(self, api_client, staff_user):
+    def test_role_cannot_be_overridden_from_input(self, api_client, staff_user_with_create_perm):
         """Even if a caller tries to slip a role through, CustomerSerializer.create()
         force-sets role='customer' server-side — this must not be overridable.
         """
-        api_client.force_authenticate(user=staff_user)
+        api_client.force_authenticate(user=staff_user_with_create_perm)
 
         response = api_client.post(
             "/api/v1/accounts/customers/",
@@ -95,8 +179,8 @@ class TestCustomerCreate:
         assert created.role == "customer"
         assert created.is_staff is False
 
-    def test_username_falls_back_to_email_when_not_provided(self, api_client, staff_user):
-        api_client.force_authenticate(user=staff_user)
+    def test_username_falls_back_to_email_when_not_provided(self, api_client, staff_user_with_create_perm):
+        api_client.force_authenticate(user=staff_user_with_create_perm)
 
         response = api_client.post(
             "/api/v1/accounts/customers/",
@@ -113,8 +197,8 @@ class TestCustomerCreate:
         created = CustomUser.objects.get(email="sam.smith@example.com")
         assert created.username == "sam.smith@example.com"
 
-    def test_username_explicit_value_is_respected(self, api_client, staff_user):
-        api_client.force_authenticate(user=staff_user)
+    def test_username_explicit_value_is_respected(self, api_client, staff_user_with_create_perm):
+        api_client.force_authenticate(user=staff_user_with_create_perm)
 
         response = api_client.post(
             "/api/v1/accounts/customers/",
@@ -131,11 +215,11 @@ class TestCustomerCreate:
         created = CustomUser.objects.get(email="sam2.smith@example.com")
         assert created.username == "sam_custom_handle"
 
-    def test_created_customer_has_unusable_password(self, api_client, staff_user):
+    def test_created_customer_has_unusable_password(self, api_client, staff_user_with_create_perm):
         """Customers created via this flow never log in — create_user(password=None, ...)
         should leave them with an unusable password, not a blank/guessable one.
         """
-        api_client.force_authenticate(user=staff_user)
+        api_client.force_authenticate(user=staff_user_with_create_perm)
 
         api_client.post(
             "/api/v1/accounts/customers/",
@@ -159,6 +243,9 @@ class TestCustomerList:
         assert response.status_code == 401
 
     def test_staff_can_list_customers(self, api_client, staff_user, customer):
+        """GET stays open to any authenticated user regardless of Group —
+        only the write actions (POST/PATCH) are permission-gated.
+        """
         api_client.force_authenticate(user=staff_user)
         response = api_client.get("/api/v1/accounts/customers/")
         assert response.status_code == 200
@@ -211,6 +298,7 @@ class TestCustomerUpdate:
         assert customer.first_name != "Changed"
 
     def test_admin_can_patch_customer(self, api_client, admin_user, customer):
+        """admin_user is a superuser — bypasses the permission check entirely."""
         api_client.force_authenticate(user=admin_user)
 
         response = api_client.patch(
@@ -223,8 +311,12 @@ class TestCustomerUpdate:
         customer.refresh_from_db()
         assert customer.first_name == "UpdatedByAdmin"
 
-    def test_manager_can_patch_customer(self, api_client, manager_user, customer):
-        api_client.force_authenticate(user=manager_user)
+    def test_manager_with_permission_can_patch_customer(self, api_client, manager_user_with_manage_perm, customer):
+        """manager_user needs 'accounts.manage_customers' explicitly — being
+        is_staff=True is not sufficient on its own. Granted here via the
+        manager_user_with_manage_perm fixture to simulate Group assignment.
+        """
+        api_client.force_authenticate(user=manager_user_with_manage_perm)
 
         response = api_client.patch(
             f"/api/v1/accounts/customers/{customer.id}/",
@@ -235,6 +327,22 @@ class TestCustomerUpdate:
         assert response.status_code == 200
         customer.refresh_from_db()
         assert customer.last_name == "UpdatedByManager"
+
+    def test_manager_without_permission_cannot_patch_customer(self, api_client, manager_user, customer):
+        """Being is_staff=True (manager_user's default) is not enough on its
+        own — PATCH requires the explicit 'accounts.manage_customers' permission.
+        """
+        api_client.force_authenticate(user=manager_user)
+
+        response = api_client.patch(
+            f"/api/v1/accounts/customers/{customer.id}/",
+            {"last_name": "ShouldNotApply"},
+            format="json",
+        )
+
+        assert response.status_code == 403
+        customer.refresh_from_db()
+        assert customer.last_name != "ShouldNotApply"
 
     def test_admin_can_deactivate_customer(self, api_client, admin_user, customer):
         """Soft-deactivate pattern — SaleOrder.customer is on_delete=PROTECT,
