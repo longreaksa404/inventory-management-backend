@@ -7,6 +7,7 @@ import { z } from "zod"
 import { Plus, Pencil, Trash2, X, Tag } from "lucide-react"
 import { productsApi } from "@/api/products"
 import type { Category } from "@/types"
+import { useAuth } from "@/hooks/useAuth"
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
@@ -252,6 +253,7 @@ function CategoryForm({
 
 export default function CategoriesPage() {
   const queryClient = useQueryClient()
+  const { hasPermission } = useAuth()
 
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState<Category | null>(null)
@@ -295,13 +297,15 @@ export default function CategoriesPage() {
             {categoriesData?.count ?? 0} categories
           </p>
         </div>
-        <button
-          onClick={openCreate}
-          className="flex items-center gap-1.5 rounded-lg bg-foreground px-3 py-1.5 text-sm font-medium text-background hover:opacity-90 transition-opacity"
-        >
-          <Plus className="h-4 w-4" />
-          Add category
-        </button>
+        {hasPermission("inventory.add_category") && (
+          <button
+            onClick={openCreate}
+            className="flex items-center gap-1.5 rounded-lg bg-foreground px-3 py-1.5 text-sm font-medium text-background hover:opacity-90 transition-opacity"
+          >
+            <Plus className="h-4 w-4" />
+            Add category
+          </button>
+        )}
       </div>
 
       {/* Table */}
@@ -374,18 +378,22 @@ export default function CategoriesPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1">
-                      <button
-                        onClick={() => openEdit(category)}
-                        className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </button>
-                      <button
-                        onClick={() => setDeleting(category)}
-                        className="rounded-md p-1.5 text-muted-foreground hover:bg-red-50 hover:text-red-500 transition-colors"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
+                      {hasPermission("inventory.change_category") && (
+                        <button
+                          onClick={() => openEdit(category)}
+                          className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                      {hasPermission("inventory.delete_category") && (
+                        <button
+                          onClick={() => setDeleting(category)}
+                          className="rounded-md p-1.5 text-muted-foreground hover:bg-red-50 hover:text-red-500 transition-colors"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

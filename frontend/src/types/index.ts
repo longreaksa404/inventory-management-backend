@@ -15,6 +15,7 @@ export interface User {
   is_staff: boolean
   is_active: boolean
   date_joined: string
+  permissions: string[]
 }
 
 export interface TokenPair {

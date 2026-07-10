@@ -30,6 +30,15 @@ export function useAuth() {
     // Generic role check for components that need fine-grained control.
     hasRole: (role: UserRole) => user?.role === role,
 
+    // Permission-based checks — mirror backend Group permissions exactly.
+    // `role` and Group assignment are independent in this system (see
+    // apps/core/management/commands/setup_rbac_groups.py), so anything
+    // gating a write action (not just role-based nav) should check these,
+    // not role, to stay honest with what the backend will actually allow.
+    hasPermission: (perm: string) => user?.permissions.includes(perm) ?? false,
+    hasAnyPermission: (perms: string[]) =>
+      user ? perms.some((p) => user.permissions.includes(p)) : false,
+
     // Full display name — falls back gracefully.
     displayName: user
       ? `${user.first_name} ${user.last_name}`.trim() || user.username
