@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Plus, Pencil, Trash2, X, Truck, Search } from "lucide-react"
 import { suppliersApi } from "@/api/suppliers"
+import { useAuth } from "@/hooks/useAuth"
 import type { Supplier } from "@/types"
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
@@ -306,6 +307,7 @@ function SupplierForm({
 
 export default function SuppliersPage() {
   const queryClient = useQueryClient()
+  const { hasPermission } = useAuth()
 
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
@@ -365,13 +367,15 @@ export default function SuppliersPage() {
             {suppliersData?.count ?? 0} supplier{(suppliersData?.count ?? 0) !== 1 ? "s" : ""}
           </p>
         </div>
-        <button
-          onClick={openCreate}
-          className="flex items-center gap-1.5 rounded-lg bg-foreground px-3 py-1.5 text-sm font-medium text-background hover:opacity-90 transition-opacity"
-        >
-          <Plus className="h-4 w-4" />
-          Add supplier
-        </button>
+        {hasPermission("suppliers.add_supplier") && (
+          <button
+            onClick={openCreate}
+            className="flex items-center gap-1.5 rounded-lg bg-foreground px-3 py-1.5 text-sm font-medium text-background hover:opacity-90 transition-opacity"
+          >
+            <Plus className="h-4 w-4" />
+            Add supplier
+          </button>
+        )}
       </div>
 
       {/* Search */}
@@ -461,18 +465,22 @@ export default function SuppliersPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1">
-                      <button
-                        onClick={() => openEdit(supplier)}
-                        className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </button>
-                      <button
-                        onClick={() => setDeleting(supplier)}
-                        className="rounded-md p-1.5 text-muted-foreground hover:bg-red-50 hover:text-red-500 transition-colors"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
+                      {hasPermission("suppliers.change_supplier") && (
+                        <button
+                          onClick={() => openEdit(supplier)}
+                          className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                      {hasPermission("suppliers.delete_supplier") && (
+                        <button
+                          onClick={() => setDeleting(supplier)}
+                          className="rounded-md p-1.5 text-muted-foreground hover:bg-red-50 hover:text-red-500 transition-colors"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

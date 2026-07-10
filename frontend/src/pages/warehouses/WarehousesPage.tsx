@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Plus, Pencil, Trash2, X, Warehouse } from "lucide-react"
 import { warehousesApi } from "@/api/warehouses"
+import { useAuth } from "@/hooks/useAuth"
 import type { Warehouse as WarehouseType } from "@/types"
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
@@ -325,6 +326,7 @@ function WarehouseForm({
 
 export default function WarehousesPage() {
   const queryClient = useQueryClient()
+  const { hasPermission } = useAuth()
 
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState<WarehouseType | null>(null)
@@ -368,13 +370,15 @@ export default function WarehousesPage() {
             {warehousesData?.count ?? 0} warehouse{(warehousesData?.count ?? 0) !== 1 ? "s" : ""}
           </p>
         </div>
-        <button
-          onClick={openCreate}
-          className="flex items-center gap-1.5 rounded-lg bg-foreground px-3 py-1.5 text-sm font-medium text-background hover:opacity-90 transition-opacity"
-        >
-          <Plus className="h-4 w-4" />
-          Add warehouse
-        </button>
+        {hasPermission("warehouses.add_warehouse") && (
+          <button
+            onClick={openCreate}
+            className="flex items-center gap-1.5 rounded-lg bg-foreground px-3 py-1.5 text-sm font-medium text-background hover:opacity-90 transition-opacity"
+          >
+            <Plus className="h-4 w-4" />
+            Add warehouse
+          </button>
+        )}
       </div>
 
       {/* Table */}
@@ -455,18 +459,22 @@ export default function WarehousesPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1">
-                      <button
-                        onClick={() => openEdit(warehouse)}
-                        className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </button>
-                      <button
-                        onClick={() => setDeleting(warehouse)}
-                        className="rounded-md p-1.5 text-muted-foreground hover:bg-red-50 hover:text-red-500 transition-colors"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
+                      {hasPermission("warehouses.change_warehouse") && (
+                        <button
+                          onClick={() => openEdit(warehouse)}
+                          className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                      {hasPermission("warehouses.delete_warehouse") && (
+                        <button
+                          onClick={() => setDeleting(warehouse)}
+                          className="rounded-md p-1.5 text-muted-foreground hover:bg-red-50 hover:text-red-500 transition-colors"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

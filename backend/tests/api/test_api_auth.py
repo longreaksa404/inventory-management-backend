@@ -70,6 +70,6 @@ def test_profile_includes_permissions(login_api_client, admin_user):
     assert response.status_code == 200
     assert "permissions" in response.data
     assert isinstance(response.data["permissions"], list)
-    # admin_user fixture is is_superuser=True — should carry every permission
-    # that exists for at least one real backend-defined permission
+    # admin_user fixture is is_superuser=True — should carry every
+    # real backend-defined permission via Django's ModelBackend
     assert "inventory.view_product" in response.data["permissions"]
